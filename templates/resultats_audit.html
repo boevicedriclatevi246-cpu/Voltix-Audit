@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Résultats Audit - Voltix Audit{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--voltix-blue);">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="{{ url_for('accueil') }}">
+            <i class="fas fa-bolt"></i> Voltix Audit
+        </a>
+    </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('accueil') }}">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('liste_projets') }}">Projets</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('detail_projet', projet_id=projet.id) }}">{{ projet.nom_projet }}</a></li>
+            <li class="breadcrumb-item active">Résultats</li>
+        </ol>
+    </nav>
+
+    <!-- En-tête -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-2">
+                <i class="fas fa-chart-line"></i> Résultats de l'audit
+            </h2>
+            <p class="text-muted">{{ projet.nom_projet }}</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('generer_pdf', projet_id=projet.id) }}" class="btn btn-danger">
+                <i class="fas fa-file-pdf"></i> Télécharger le rapport PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Classe énergétique -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm text-center py-4"
+                 style="background: linear-gradient(135deg,
+                        {% if resultats.classe_energie == 'A' %}#27ae60{% elif resultats.classe_energie == 'B' %}#2ecc71{% elif resultats.classe_energie == 'C' %}#f1c40f{% elif resultats.classe_energie == 'D' %}#f39c12{% elif resultats.classe_energie == 'E' %}#e67e22{% elif resultats.classe_energie == 'F' %}#e74c3c{% else %}#c0392b{% endif %} 0%,
+                        {% if resultats.classe_energie == 'A' %}#229954{% elif resultats.classe_energie == 'B' %}#27ae60{% elif resultats.classe_energie == 'C' %}#f39c12{% elif resultats.classe_energie == 'D' %}#e67e22{% elif resultats.classe_energie == 'E' %}#d35400{% elif resultats.classe_energie == 'F' %}#c0392b{% else %}#a93226{% endif %} 100%);">
+                <h1 class="display-1 text-white fw-bold mb-2">{{ resultats.classe_energie }}</h1>
+                <h4 class="text-white">Classe énergétique</h4>
+                <p class="text-white mb-0">{{ resultats.consommation_totale_kwh_an|round|int|format_number }} kWh/an</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicateurs clés -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-bolt fa-3x text-warning mb-3"></i>
+                    <h5>{{ resultats.consommation_totale_kwh_an|round|int|format_number }} kWh/an</h5>
+                    <small class="text-muted">Consommation annuelle</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-leaf fa-3x text-success mb-3"></i>
+                    <h5>{{ resultats.emissions_co2_kg_an|round|int|format_number }} kg CO2/an</h5>
+                    <small class="text-muted">Émissions CO2</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-coins fa-3x text-info mb-3"></i>
+                    <h5>{{ resultats.cout_annuel_fcfa|round|int|format_number }} FCFA/an</h5>
+                    <small class="text-muted">Coût annuel</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-star fa-3x text-primary mb-3"></i>
+                    <h5>{{ resultats.score_performance }}/100</h5>
+                    <small class="text-muted">Score de performance</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommandations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-lightbulb"></i> Recommandations d'amélioration
+                    </h5>
+
+                    {% if recommandations %}
+                        {% for reco in recommandations %}
+                        <div class="card mb-3 border-start border-{{ 'danger' if reco.priorite == 'haute' else 'warning' if reco.priorite == 'moyenne' else 'info' }} border-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-2">
+                                            <span class="badge bg-{{ 'danger' if reco.priorite == 'haute' else 'warning' if reco.priorite == 'moyenne' else 'info' }}">
+                                                {{ reco.priorite|upper }}
+                                            </span>
+                                            <span class="badge bg-secondary">{{ reco.categorie }}</span>
+                                        </h6>
+                                        <h5 class="mb-2">{{ reco.titre }}</h5>
+                                        <p class="mb-2">{{ reco.description }}</p>
+                                        <div class="row mt-3">
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Économies</small>
+                                                <p class="fw-bold text-success mb-0">{{ reco.economie_estimee_fcfa|round|int|format_number }} FCFA/an</p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Investissement</small>
+                                                <p class="fw-bold mb-0">{{ reco.cout_investissement_fcfa|round|int|format_number }} FCFA</p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Retour sur investissement</small>
+                                                <p class="fw-bold text-primary mb-0">{{ reco.temps_retour_annees|round(1) }} ans</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Total économies -->
+                        <div class="alert alert-success mt-4" role="alert">
+                            <h5><i class="fas fa-piggy-bank"></i> Potentiel d'économies total</h5>
+                            <h3 class="mb-0">{{ (recommandations|sum(attribute='economie_estimee_fcfa'))|round|int|format_number }} FCFA/an</h3>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Aucune recommandation générée.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Filtre pour formater les nombres -->
+{% set format_number = 'format_number' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Formater les nombres avec espaces
+document.addEventListener('DOMContentLoaded', function() {
+    // Code pour animations ou graphiques si besoin
+});
+</script>
+{% endblock %}
+
+{% if current_user.plan in ['pro', 'entreprise'] %}
+    <a href="{{ url_for('export_excel', projet_id=projet.id) }}" class="btn btn-success">
+        <i class="fas fa-file-excel"></i> Exporter en Excel
+    </a>
+{% endif %}

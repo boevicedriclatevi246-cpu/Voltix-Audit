@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Nouvel Étage - Voltix Audit{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--voltix-blue);">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="{{ url_for('accueil') }}">
+            <i class="fas fa-bolt"></i> Voltix Audit
+        </a>
+    </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+
+            <a href="{{ url_for('detail_projet', projet_id=projet_id) }}" class="text-decoration-none text-primary mb-3 d-inline-block">
+                <i class="fas fa-arrow-left"></i> Retour au projet
+            </a>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <h4 class="mb-4">
+                        <i class="fas fa-layer-group"></i> Ajouter un étage
+                    </h4>
+
+                    <form method="POST" action="{{ url_for('nouvel_etage', projet_id=projet_id) }}">
+
+                        <!-- Numéro d'étage -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Numéro d'étage <span class="text-danger">*</span></label>
+                            <select name="numero" class="form-select" required>
+                                <option value="">Sélectionner</option>
+                                <option value="-2">Sous-sol -2</option>
+                                <option value="-1">Sous-sol -1</option>
+                                <option value="0" selected>Rez-de-chaussée</option>
+                                <option value="1">1er étage</option>
+                                <option value="2">2e étage</option>
+                                <option value="3">3e étage</option>
+                                <option value="4">4e étage</option>
+                                <option value="5">5e étage</option>
+                                <option value="6">6e étage</option>
+                                <option value="7">7e étage</option>
+                                <option value="8">8e étage</option>
+                                <option value="9">9e étage</option>
+                                <option value="10">10e étage</option>
+                            </select>
+                        </div>
+
+                        <!-- Nom de l'étage -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nom de l'étage <span class="text-danger">*</span></label>
+                            <input type="text" name="nom" class="form-control"
+                                   placeholder="Ex: Rez-de-chaussée, 1er étage, Sous-sol" required>
+                            <small class="text-muted">Un nom descriptif pour identifier l'étage</small>
+                        </div>
+
+                        <!-- Surface -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Surface de l'étage (m²)</label>
+                            <input type="number" name="surface" class="form-control"
+                                   placeholder="Ex: 250" step="0.01" min="0">
+                        </div>
+
+                        <!-- Hauteur sous plafond -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Hauteur sous plafond (m)</label>
+                            <input type="number" name="hauteur" class="form-control"
+                                   placeholder="Ex: 2.5" step="0.01" min="0" value="2.5">
+                        </div>
+
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            Vous pourrez ajouter des pièces après la création de l'étage.
+                        </div>
+
+                        <!-- Boutons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('detail_projet', projet_id=projet_id) }}" class="btn btn-secondary">
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Créer l'étage
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

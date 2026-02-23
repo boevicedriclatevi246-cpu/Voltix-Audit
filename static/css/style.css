@@ -1,0 +1,713 @@
+/* ============================================
+   VOLTIX AUDIT - DESIGN MODERNE & CONTRASTÉ
+   Inspiré Duolingo : Couleurs vives, contraste élevé
+   ============================================ */
+
+/* VARIABLES CSS - THÈME CLAIR */
+:root {
+    /* Couleurs principales - Vert vif comme Duolingo */
+    --primary-green: #58cc02;       /* Vert vif principal */
+    --primary-green-dark: #43a102;  /* Vert foncé hover */
+    --primary-green-light: #89e219; /* Vert clair accents */
+
+    /* Fond et surfaces */
+    --bg-primary: #ffffff;          /* Fond principal blanc pur */
+    --bg-secondary: #f7f7f7;        /* Fond secondaire gris très clair */
+    --card-bg: #ffffff;             /* Fond des cartes */
+    --card-border: #e5e5e5;         /* Bordures subtiles */
+
+    /* Texte - Contraste élevé */
+    --text-primary: #3c3c3c;        /* Texte principal - Très foncé */
+    --text-secondary: #777777;      /* Texte secondaire */
+    --text-on-green: #ffffff;       /* Texte sur fond vert */
+
+    /* Couleurs secondaires vives */
+    --blue: #1cb0f6;                /* Bleu Duolingo */
+    --red: #ff4b4b;                 /* Rouge vif */
+    --orange: #ff9600;              /* Orange vif */
+    --yellow: #ffc800;              /* Jaune vif */
+
+    /* Ombres */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+    --shadow-green: 0 4px 0 #43a102; /* Ombre colorée Duolingo style */
+}
+
+/* VARIABLES CSS - THÈME SOMBRE */
+[data-theme="dark"] {
+    /* Couleurs principales - Vert adapté au sombre */
+    --primary-green: #58cc02;
+    --primary-green-dark: #6dd604;
+    --primary-green-light: #89e219;
+
+    /* Fond et surfaces - Contraste élevé */
+    --bg-primary: #1f1f1f;          /* Fond très sombre mais pas noir pur */
+    --bg-secondary: #2a2a2a;        /* Fond secondaire */
+    --card-bg: #2d2d2d;             /* Cartes bien visibles */
+    --card-border: #404040;         /* Bordures visibles */
+
+    /* Texte - Très contrasté */
+    --text-primary: #f5f5f5;        /* Texte principal très clair */
+    --text-secondary: #b0b0b0;      /* Texte secondaire clair */
+    --text-on-green: #ffffff;
+
+    /* Couleurs secondaires */
+    --blue: #1cb0f6;
+    --red: #ff6b6b;
+    --orange: #ffa726;
+    --yellow: #ffd54f;
+
+    /* Ombres sombres */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
+    --shadow-green: 0 4px 0 #43a102;
+}
+
+/* ============================================
+   STYLES GLOBAUX
+   ============================================ */
+
+* {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+body {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+/* ============================================
+   NAVBAR - Style Duolingo
+   ============================================ */
+
+.navbar {
+    background-color: var(--primary-green) !important;
+    box-shadow: var(--shadow-md);
+    border-bottom: 4px solid var(--primary-green-dark);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--text-on-green) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.nav-link {
+    color: var(--text-on-green) !important;
+    font-weight: 600;
+    padding: 0.5rem 1rem !important;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================
+   BOUTONS - Style Duolingo avec ombre colorée
+   ============================================ */
+
+.btn {
+    font-weight: 700;
+    border-radius: 16px;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-green);
+    color: var(--text-on-green);
+    box-shadow: var(--shadow-green);
+    border-bottom: 4px solid var(--primary-green-dark);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-green-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--primary-green-dark);
+}
+
+.btn-primary:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--primary-green-dark);
+}
+
+.btn-success {
+    background-color: var(--primary-green-light);
+    color: var(--text-on-green);
+    box-shadow: 0 4px 0 #6dbb0a;
+    border-bottom: 4px solid #6dbb0a;
+}
+
+.btn-success:hover {
+    background-color: #89e219;
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background-color: var(--red);
+    color: white;
+    box-shadow: 0 4px 0 #cc3c3c;
+    border-bottom: 4px solid #cc3c3c;
+}
+
+.btn-danger:hover {
+    background-color: #ff6b6b;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: #e5e5e5;
+    color: var(--text-primary);
+    box-shadow: 0 4px 0 #c0c0c0;
+    border-bottom: 4px solid #c0c0c0;
+}
+
+[data-theme="dark"] .btn-secondary {
+    background-color: #404040;
+    color: var(--text-primary);
+    box-shadow: 0 4px 0 #2a2a2a;
+}
+
+.btn-info {
+    background-color: var(--blue);
+    color: white;
+    box-shadow: 0 4px 0 #1591c7;
+    border-bottom: 4px solid #1591c7;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 12px;
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 20px;
+}
+
+/* ============================================
+   CARDS - Contraste élevé avec bordures
+   ============================================ */
+
+.card {
+    background-color: var(--card-bg);
+    border: 3px solid var(--card-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-green);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+/* ============================================
+   FORMS - Inputs bien visibles
+   ============================================ */
+
+.form-label {
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-control,
+.form-select {
+    background-color: var(--card-bg);
+    border: 3px solid var(--card-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--card-bg);
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 4px rgba(88, 204, 2, 0.15);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* ============================================
+   BADGES - Couleurs vives
+   ============================================ */
+
+.badge {
+    font-weight: 700;
+    padding: 0.5rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge.bg-success {
+    background-color: var(--primary-green) !important;
+    color: white;
+}
+
+.badge.bg-warning {
+    background-color: var(--orange) !important;
+    color: white;
+}
+
+.badge.bg-danger {
+    background-color: var(--red) !important;
+    color: white;
+}
+
+.badge.bg-info {
+    background-color: var(--blue) !important;
+    color: white;
+}
+
+.badge.bg-primary {
+    background-color: var(--primary-green) !important;
+    color: white;
+}
+
+.badge.bg-secondary {
+    background-color: #888888 !important;
+    color: white;
+}
+
+/* ============================================
+   ALERTS - Bien visibles
+   ============================================ */
+
+.alert {
+    border-radius: 16px;
+    border: 3px solid;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+}
+
+.alert-success {
+    background-color: rgba(88, 204, 2, 0.15);
+    border-color: var(--primary-green);
+    color: var(--text-primary);
+}
+
+.alert-info {
+    background-color: rgba(28, 176, 246, 0.15);
+    border-color: var(--blue);
+    color: var(--text-primary);
+}
+
+.alert-danger {
+    background-color: rgba(255, 75, 75, 0.15);
+    border-color: var(--red);
+    color: var(--text-primary);
+}
+
+.alert-warning {
+    background-color: rgba(255, 150, 0, 0.15);
+    border-color: var(--orange);
+    color: var(--text-primary);
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+.table {
+    color: var(--text-primary);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: var(--primary-green);
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    border-bottom: 2px solid var(--card-border);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(88, 204, 2, 0.08);
+}
+
+.table-light {
+    background-color: var(--bg-secondary);
+}
+
+/* ============================================
+   BREADCRUMB
+   ============================================ */
+
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumb-item {
+    font-weight: 600;
+}
+
+.breadcrumb-item a {
+    color: var(--primary-green);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-green-dark);
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   LIST GROUP
+   ============================================ */
+
+.list-group-item {
+    background-color: var(--card-bg);
+    border: 2px solid var(--card-border);
+    color: var(--text-primary);
+    font-weight: 600;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+}
+
+.list-group-item-action:hover {
+    background-color: rgba(88, 204, 2, 0.1);
+    border-color: var(--primary-green);
+    transform: translateX(4px);
+}
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+
+.progress {
+    background-color: var(--card-border);
+    border-radius: 10px;
+    height: 12px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-color: var(--primary-green);
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+/* ============================================
+   TEXT UTILITIES
+   ============================================ */
+
+.text-primary {
+    color: var(--primary-green) !important;
+}
+
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+/* ============================================
+   BOUTON TOGGLE DARK MODE - Style Duolingo
+   ============================================ */
+
+.theme-toggle {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary-green);
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    border-bottom: 5px solid var(--primary-green-dark);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(15deg);
+    background-color: var(--primary-green-light);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* ============================================
+   HOVER EFFECTS
+   ============================================ */
+
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ============================================
+   SCROLLBAR PERSONNALISÉ
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-green);
+    border-radius: 6px;
+    border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-green-dark);
+}
+
+/* ============================================
+   MODAL
+   ============================================ */
+
+.modal-content {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    border-radius: 20px;
+    border: 3px solid var(--card-border);
+}
+
+.modal-header {
+    border-bottom: 3px solid var(--card-border);
+    background-color: var(--bg-secondary);
+}
+
+.modal-title {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modal-footer {
+    border-top: 3px solid var(--card-border);
+}
+
+/* ============================================
+   DROPDOWN
+   ============================================ */
+
+.dropdown-menu {
+    background-color: var(--card-bg);
+    border: 3px solid var(--card-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+}
+
+.dropdown-item {
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    margin: 0.25rem 0.5rem;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(88, 204, 2, 0.1);
+    color: var(--primary-green);
+}
+
+/* ============================================
+   INPUT GROUPS
+   ============================================ */
+
+.input-group-text {
+    background-color: var(--bg-secondary);
+    border: 3px solid var(--card-border);
+    color: var(--text-primary);
+    font-weight: 700;
+    border-radius: 12px;
+}
+
+/* ============================================
+   LINKS
+   ============================================ */
+
+a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+a:hover {
+    color: var(--primary-green-dark);
+    text-decoration: underline;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.bounce {
+    animation: bounce 2s infinite;
+}
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+
+.shadow-sm {
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.shadow {
+    box-shadow: var(--shadow-md) !important;
+}
+
+.shadow-lg {
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.rounded-lg {
+    border-radius: 16px !important;
+}
+
+.rounded-xl {
+    border-radius: 20px !important;
+}
+
+.fw-bold {
+    font-weight: 700 !important;
+}
+
+.fw-semibold {
+    font-weight: 600 !important;
+}
+
+/* ============================================
+   CORRECTION - Card gradient d'accueil
+   ============================================ */
+
+/* Card avec fond vert gradient - texte bien visible */
+.bg-gradient {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%) !important;
+    color: white !important;
+}
+
+.bg-gradient h1,
+.bg-gradient h2,
+.bg-gradient h3,
+.bg-gradient h4,
+.bg-gradient h5,
+.bg-gradient h6,
+.bg-gradient p,
+.bg-gradient .h1,
+.bg-gradient .h2,
+.bg-gradient .h3,
+.bg-gradient .h4,
+.bg-gradient .h5,
+.bg-gradient .h6 {
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+}
+
+.bg-gradient i {
+    color: white !important;
+}
+
+.bg-gradient .text-white {
+    color: white !important;
+}
+
+/* Texte sur fond coloré - toujours blanc avec ombre */
+.card.bg-gradient .card-body * {
+    color: white !important;
+}

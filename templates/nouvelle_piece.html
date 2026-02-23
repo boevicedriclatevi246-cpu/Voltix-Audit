@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Nouvelle Pièce - Voltix Audit{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--voltix-blue);">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="{{ url_for('accueil') }}">
+            <i class="fas fa-bolt"></i> Voltix Audit
+        </a>
+    </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+
+            <a href="{{ url_for('detail_etage', projet_id=projet_id, etage_id=etage_id) }}"
+               class="text-decoration-none text-primary mb-3 d-inline-block">
+                <i class="fas fa-arrow-left"></i> Retour à l'étage
+            </a>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <h4 class="mb-4">
+                        <i class="fas fa-door-open"></i> Ajouter une pièce
+                    </h4>
+
+                    <form method="POST" action="{{ url_for('nouvelle_piece', projet_id=projet_id, etage_id=etage_id) }}">
+
+                        <!-- Nom de la pièce -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nom de la pièce <span class="text-danger">*</span></label>
+                            <input type="text" name="nom" class="form-control"
+                                   placeholder="Ex: Bureau Direction, Salle de réunion" required>
+                        </div>
+
+                        <!-- Type de pièce -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Type de pièce <span class="text-danger">*</span></label>
+                            <select name="type_piece" class="form-select" required>
+                                <option value="">Sélectionner</option>
+                                <option value="Bureau">Bureau</option>
+                                <option value="Salle de réunion">Salle de réunion</option>
+                                <option value="Open space">Open space</option>
+                                <option value="Hall d'entrée">Hall d'entrée</option>
+                                <option value="Couloir">Couloir</option>
+                                <option value="Sanitaires">Sanitaires</option>
+                                <option value="Cuisine">Cuisine</option>
+                                <option value="Salle de bain">Salle de bain</option>
+                                <option value="Stockage">Stockage</option>
+                                <option value="Technique">Salle technique</option>
+                                <option value="Cafétéria">Cafétéria</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+
+                        <!-- Surface uniquement -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Surface de la pièce (m²) <span class="text-danger">*</span></label>
+                            <input type="number" name="surface" class="form-control"
+                                   placeholder="Ex: 20" step="0.01" min="0" required>
+                            <small class="text-muted">Entrez la surface totale de la pièce en mètres carrés</small>
+                        </div>
+
+                        <!-- Hauteur et occupants -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Hauteur plafond (m)</label>
+                                <input type="number" name="hauteur" class="form-control"
+                                       placeholder="Ex: 2.5" step="0.01" min="0" value="2.5">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Nombre d'occupants</label>
+                                <input type="number" name="nb_occupants" class="form-control"
+                                       placeholder="Ex: 5" min="0" value="0">
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle"></i>
+                            Vous pourrez ajouter des équipements après la création de la pièce.
+                        </div>
+
+                        <!-- Boutons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('detail_etage', projet_id=projet_id, etage_id=etage_id) }}"
+                               class="btn btn-secondary">
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Créer la pièce
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+

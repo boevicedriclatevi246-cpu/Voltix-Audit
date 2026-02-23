@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}{{ piece.nom_piece }} - Voltix Audit{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="{{ url_for('accueil') }}">
+            <img src="{{ url_for('static', filename='images/logo.png') }}"
+                 alt="Logo"
+                 style="height: 35px; width: 35px; margin-right: 10px; vertical-align: middle; object-fit: contain;">
+            Voltix Audit
+        </a>
+    </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('accueil') }}">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('liste_projets') }}">Projets</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('detail_projet', projet_id=projet.id) }}">{{ projet.nom_projet }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('detail_etage', projet_id=projet.id, etage_id=etage.id) }}">{{ etage.nom_etage }}</a></li>
+            <li class="breadcrumb-item active">{{ piece.nom_piece }}</li>
+        </ol>
+    </nav>
+
+    <!-- Messages Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- En-tête pièce -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-2">
+                <i class="fas fa-door-open"></i> {{ piece.nom_piece }}
+            </h2>
+            <p class="text-muted mb-0">
+                <i class="fas fa-tag"></i> {{ piece.type_piece }} •
+                <i class="fas fa-ruler"></i> {{ piece.surface_piece }} m²
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('detail_etage', projet_id=projet.id, etage_id=etage.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à l'étage
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques de la pièce -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-ruler-combined fa-2x text-primary mb-2"></i>
+                    <h4 class="mb-0">{{ piece.surface_piece }}</h4>
+                    <small class="text-muted">m² Surface</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-users fa-2x text-info mb-2"></i>
+                    <h4 class="mb-0">{{ piece.nb_occupants }}</h4>
+                    <small class="text-muted">Occupants</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-plug fa-2x text-warning mb-2"></i>
+                    <h4 class="mb-0">{{ piece.equipements_count }}</h4>
+                    <small class="text-muted">Équipements</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-bolt fa-2x text-success mb-2"></i>
+                    <h4 class="mb-0">{{ "%.1f"|format(piece.puissance_totale_w / 1000) }}</h4>
+                    <small class="text-muted">kW total</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guide rapide -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <h5 class="alert-heading">
+                    <i class="fas fa-info-circle"></i> Guide rapide
+                </h5>
+                <hr>
+                <ol class="mb-0">
+                    <li><strong>Sélectionnez un type d'équipement</strong> dans la liste déroulante (30 types disponibles)</li>
+                    <li><strong>Indiquez la quantité</strong> de cet équipement dans la pièce</li>
+                    <li><strong>Précisez les heures d'utilisation par jour</strong> (exemple: 8h pour un ordinateur de bureau)</li>
+                    <li><strong>Indiquez les jours d'utilisation par semaine</strong> (exemple: 5 jours pour du matériel de bureau)</li>
+                    <li><strong>Cliquez sur "Ajouter"</strong> pour enregistrer l'équipement</li>
+                    <li><strong>Répétez</strong> pour tous les équipements de la pièce</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire ajout équipement -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-plus-circle"></i> Ajouter un équipement
+                    </h5>
+
+                    <form method="POST" action="{{ url_for('nouvel_equipement', projet_id=projet.id, piece_id=piece.id) }}">
+                        <div class="row">
+
+                            <!-- Type d'équipement -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-plug"></i> Type d'équipement
+                                </label>
+                                <select name="type_equipement" class="form-select" required>
+                                    <option value="">Sélectionner un équipement</option>
+                                    <option value="Ampoule LED (10W)">💡 Ampoule LED (10W)</option>
+                                    <option value="Ampoule halogène (50W)">💡 Ampoule halogène (50W)</option>
+                                    <option value="Tube fluorescent (40W)">💡 Tube fluorescent (40W)</option>
+                                    <option value="Climatiseur split (2000W)">❄️ Climatiseur split (2000W)</option>
+                                    <option value="Climatiseur window (1500W)">❄️ Climatiseur window (1500W)</option>
+                                    <option value="Ventilateur de plafond (75W)">🌀 Ventilateur de plafond (75W)</option>
+                                    <option value="Ventilateur sur pied (50W)">🌀 Ventilateur sur pied (50W)</option>
+                                    <option value="Réfrigérateur (150W)">🧊 Réfrigérateur (150W)</option>
+                                    <option value="Congélateur (200W)">❄️ Congélateur (200W)</option>
+                                    <option value="Micro-ondes (1000W)">🔥 Micro-ondes (1000W)</option>
+                                    <option value="Four électrique (2500W)">🔥 Four électrique (2500W)</option>
+                                    <option value="Plaque de cuisson (2000W)">🔥 Plaque de cuisson (2000W)</option>
+                                    <option value="Bouilloire électrique (2000W)">☕ Bouilloire électrique (2000W)</option>
+                                    <option value="Cafetière (800W)">☕ Cafetière (800W)</option>
+                                    <option value="Ordinateur de bureau (300W)">💻 Ordinateur de bureau (300W)</option>
+                                    <option value="Ordinateur portable (65W)">💻 Ordinateur portable (65W)</option>
+                                    <option value="Écran d'ordinateur (40W)">🖥️ Écran d'ordinateur (40W)</option>
+                                    <option value="Imprimante laser (400W)">🖨️ Imprimante laser (400W)</option>
+                                    <option value="Photocopieuse (1500W)">📠 Photocopieuse (1500W)</option>
+                                    <option value="Télévision LED 32 pouces (50W)">📺 Télévision LED 32" (50W)</option>
+                                    <option value="Télévision LED 55 pouces (100W)">📺 Télévision LED 55" (100W)</option>
+                                    <option value="Chauffe-eau électrique (2000W)">🚿 Chauffe-eau électrique (2000W)</option>
+                                    <option value="Machine à laver (500W)">🧺 Machine à laver (500W)</option>
+                                    <option value="Sèche-linge (3000W)">👔 Sèche-linge (3000W)</option>
+                                    <option value="Fer à repasser (1200W)">👔 Fer à repasser (1200W)</option>
+                                    <option value="Aspirateur (1400W)">🧹 Aspirateur (1400W)</option>
+                                    <option value="Pompe à eau (750W)">💧 Pompe à eau (750W)</option>
+                                    <option value="Chargeur de téléphone (10W)">📱 Chargeur de téléphone (10W)</option>
+                                    <option value="Routeur WiFi (10W)">📡 Routeur WiFi (10W)</option>
+                                    <option value="Projecteur (250W)">📽️ Projecteur (250W)</option>
+                                </select>
+                                <small class="text-muted">Choisissez le type d'équipement à ajouter</small>
+                            </div>
+
+                            <!-- Quantité -->
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-hashtag"></i> Quantité
+                                </label>
+                                <input type="number" name="quantite" class="form-control" value="1" min="1" required>
+                                <small class="text-muted">Nombre d'unités</small>
+                            </div>
+
+                            <!-- Heures/jour -->
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-clock"></i> Heures/jour
+                                </label>
+                                <input type="number" name="heures_jour" class="form-control" value="8" min="0" max="24" step="0.5" required>
+                                <small class="text-muted">Durée d'utilisation quotidienne</small>
+                            </div>
+
+                            <!-- Jours/semaine -->
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-calendar"></i> Jours/semaine
+                                </label>
+                                <input type="number" name="jours_semaine" class="form-control" value="5" min="0" max="7" required>
+                                <small class="text-muted">Fréquence d'utilisation</small>
+                            </div>
+
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-plus"></i> Ajouter
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des équipements -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-list"></i> Équipements de la pièce ({{ equipements|length }})
+                    </h5>
+
+                    {% if equipements %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 5%;">#</th>
+                                        <th style="width: 30%;">Équipement</th>
+                                        <th class="text-center" style="width: 10%;">Quantité</th>
+                                        <th class="text-center" style="width: 12%;">Puissance</th>
+                                        <th class="text-center" style="width: 13%;">Heures/jour</th>
+                                        <th class="text-center" style="width: 13%;">Jours/sem</th>
+                                        <th class="text-center" style="width: 12%;">Conso/an</th>
+                                        <th class="text-center" style="width: 5%;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for eq in equipements %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>
+                                            <i class="fas fa-plug text-warning"></i>
+                                            <strong>{{ eq.nom_equipement }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ eq.categorie }}</small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary">{{ eq.quantite }}</span>
+                                        </td>
+                                        <td class="text-center">{{ eq.puissance_w }} W</td>
+                                        <td class="text-center">{{ eq.heures_utilisation_jour }} h</td>
+                                        <td class="text-center">{{ eq.jours_utilisation_semaine }} j</td>
+                                        <td class="text-center">
+                                            {% set conso_annuelle = (eq.puissance_w * eq.quantite * eq.heures_utilisation_jour * eq.jours_utilisation_semaine * 52) / 1000 %}
+                                            <strong>{{ "%.1f"|format(conso_annuelle) }}</strong> kWh
+                                        </td>
+                                        <td class="text-center">
+                                            <form method="POST" action="{{ url_for('supprimer_equipement', projet_id=projet.id, piece_id=piece.id, equipement_id=eq.id) }}"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('Supprimer cet équipement ?');">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="2">TOTAL</th>
+                                        <th class="text-center">
+                                            <span class="badge bg-success">
+                                                {{ equipements|sum(attribute='quantite') }}
+                                            </span>
+                                        </th>
+                                        <th class="text-center">
+                                            <strong>{{ piece.puissance_totale_w }} W</strong>
+                                        </th>
+                                        <th colspan="2"></th>
+                                        <th class="text-center">
+                                            {% set total_conso = namespace(value=0) %}
+                                            {% for eq in equipements %}
+                                                {% set total_conso.value = total_conso.value + ((eq.puissance_w * eq.quantite * eq.heures_utilisation_jour * eq.jours_utilisation_semaine * 52) / 1000) %}
+                                            {% endfor %}
+                                            <strong class="text-success">{{ "%.1f"|format(total_conso.value) }} kWh</strong>
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-plug fa-4x text-muted mb-3"></i>
+                            <p class="text-muted">Aucun équipement ajouté</p>
+                            <p class="text-muted">Utilisez le formulaire ci-dessus pour ajouter des équipements</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

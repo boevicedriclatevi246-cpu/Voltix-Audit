@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}{{ etage.nom_etage }} - Voltix Audit{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--voltix-blue);">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="{{ url_for('accueil') }}">
+            <i class="fas fa-bolt"></i> Voltix Audit
+        </a>
+    </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('accueil') }}">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('liste_projets') }}">Projets</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('detail_projet', projet_id=projet_id) }}">Projet</a></li>
+            <li class="breadcrumb-item active">{{ etage.nom_etage }}</li>
+        </ol>
+    </nav>
+
+    <!-- En-tête -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="mb-2">
+            <i class="fas fa-building"></i> {{ etage.nom_etage }}
+        </h2>
+        <p class="text-muted mb-0">
+            {{ etage.surface_etage }} m² •
+            Hauteur: {{ etage.hauteur_sous_plafond }} m •
+            {{ pieces|length }} pièce(s)
+        </p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('nouvelle_piece', projet_id=projet_id, etage_id=etage.id) }}" class="btn btn-primary me-2">
+            <i class="fas fa-plus"></i> Ajouter une pièce
+        </a>
+        <form method="POST" action="{{ url_for('supprimer_etage', projet_id=projet_id, etage_id=etage.id) }}"
+              class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet étage et toutes ses pièces ?');">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Supprimer l'étage
+            </button>
+        </form>
+    </div>
+</div>
+
+    <!-- Statistiques de l'étage -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-door-open fa-2x text-primary mb-2"></i>
+                    <h4 class="mb-0">{{ pieces|length }}</h4>
+                    <small class="text-muted">Pièces</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-plug fa-2x text-warning mb-2"></i>
+                    <h4 class="mb-0">{{ etage.equipements_count or 0 }}</h4>
+                    <small class="text-muted">Équipements</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-bolt fa-2x text-success mb-2"></i>
+                    <h4 class="mb-0">{{ ((etage.puissance_totale_w or 0) / 1000)|round(1) }}</h4>
+                    <small class="text-muted">kW total</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des pièces -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-door-open"></i> Pièces de l'étage
+                    </h5>
+
+                    {% if pieces %}
+                        <div class="row">
+                            {% for piece in pieces %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card h-100 border hover-shadow">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title mb-0">
+                                                <i class="fas fa-door-closed"></i> {{ piece.nom_piece }}
+                                            </h6>
+                                            {% if piece.equipements_count > 0 %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> Complet
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-exclamation"></i> Incomplet
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="text-muted small mb-2">{{ piece.type_piece }}</p>
+                                        <p class="mb-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-ruler-combined"></i> {{ piece.surface_piece }} m²<br>
+                                                <i class="fas fa-plug"></i> {{ piece.equipements_count or 0 }} équipement(s)
+                                            </small>
+                                        </p>
+                                        <a href="{{ url_for('detail_piece', projet_id=projet_id, piece_id=piece.id) }}"
+                                           class="btn btn-sm btn-outline-primary w-100">
+                                            {% if piece.equipements_count > 0 %}
+                                                <i class="fas fa-eye"></i> Voir détails
+                                            {% else %}
+                                                <i class="fas fa-plus"></i> Ajouter équipements
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Bouton retour -->
+                        <div class="mt-4">
+                            <a href="{{ url_for('detail_projet', projet_id=projet_id) }}" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle"></i> Terminer cet étage
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-door-open fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucune pièce créée</p>
+                            <a href="{{ url_for('nouvelle_piece', projet_id=projet_id, etage_id=etage.id) }}"
+                               class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Ajouter la première pièce
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+.hover-shadow:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+}
+</style>
+{% endblock %}

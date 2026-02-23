@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}Tarifs - Voltix Audit{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="{{ url_for('accueil') }}">
+            <i class="fas fa-bolt"></i> Voltix Audit
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('accueil') }}">
+                        <i class="fas fa-home"></i> Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('liste_projets') }}">
+                        <i class="fas fa-folder"></i> Projets
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('tarifs') }}">
+                        <i class="fas fa-tag"></i> Tarifs
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('mon_compte') }}">
+                        <i class="fas fa-user"></i> Mon compte
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('deconnexion') }}">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5 mb-5">
+
+    <!-- Messages Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- En-tête -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">
+            <i class="fas fa-gem"></i> Nos Plans d'Abonnement
+        </h1>
+        <p class="lead text-secondary">
+            Choisissez le plan qui correspond à vos besoins
+        </p>
+    </div>
+
+    <!-- Plans - SEULEMENT 2 PLANS -->
+    <div class="row g-4 justify-content-center">
+
+        <!-- PLAN GRATUIT -->
+        <div class="col-lg-5 col-md-6">
+            <div class="card h-100 shadow-lg">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-leaf fa-3x text-success mb-3"></i>
+                        <h3 class="fw-bold">Gratuit</h3>
+                        <p class="text-muted">Idéal pour débuter</p>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <h2 class="display-4 fw-bold">0 <small class="fs-6">FCFA</small></h2>
+                        <p class="text-muted">/ mois</p>
+                    </div>
+
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>3 audits</strong> par mois
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>3 projets</strong> actifs maximum
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Rapports PDF avec filigrane
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            5 recommandations standard
+                        </li>
+                        <li class="mb-3 text-muted">
+                            <i class="fas fa-times-circle me-2"></i>
+                            Archivage après 30 jours
+                        </li>
+                        <li class="mb-3 text-muted">
+                            <i class="fas fa-times-circle me-2"></i>
+                            Pas de comparaison de projets
+                        </li>
+                    </ul>
+
+                    {% if current_user.plan == 'gratuit' %}
+                        <button class="btn btn-secondary w-100 btn-lg" disabled>
+                            <i class="fas fa-check"></i> Plan actuel
+                        </button>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('paiement_initier', plan='gratuit') }}">
+                            <button type="submit" class="btn btn-secondary w-100 btn-lg">
+                                Rétrograder
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAN PRO - POPULAIRE -->
+        <div class="col-lg-5 col-md-6">
+            <div class="card h-100 shadow-lg border-4" style="border-color: var(--primary-green) !important;">
+                <div class="position-relative">
+                    <div class="position-absolute top-0 start-50 translate-middle">
+                        <span class="badge bg-warning text-dark px-4 py-2 rounded-pill">
+                            <i class="fas fa-star"></i> RECOMMANDÉ
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 mt-3">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-rocket fa-3x mb-3" style="color: var(--primary-green);"></i>
+                        <h3 class="fw-bold">Pro</h3>
+                        <p class="text-muted">Pour les professionnels</p>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <h2 class="display-4 fw-bold" style="color: var(--primary-green);">15 000 <small class="fs-6">FCFA</small></h2>
+                        <p class="text-muted">/ mois</p>
+                    </div>
+
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>20 audits</strong> par mois
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Projets illimités</strong>
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Rapports PDF <strong>professionnels</strong> (badge PRO)
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Comparaison de projets</strong>
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Email après chaque audit
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Graphiques de tendance</strong>
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Historique permanent
+                        </li>
+                    </ul>
+
+                    {% if current_user.plan == 'pro' %}
+                        <button class="btn btn-success w-100 btn-lg" disabled>
+                            <i class="fas fa-check"></i> Plan actuel
+                        </button>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('paiement_initier', plan='pro') }}">
+                            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                                <i class="fas fa-crown"></i> Passer à Pro
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Comparaison détaillée -->
+    <div class="row mt-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-4 text-center">
+                        <i class="fas fa-balance-scale"></i> Comparaison des plans
+                    </h4>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fonctionnalité</th>
+                                    <th class="text-center">Gratuit</th>
+                                    <th class="text-center">Pro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Audits par mois</strong></td>
+                                    <td class="text-center">3</td>
+                                    <td class="text-center"><strong>20</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Projets actifs</strong></td>
+                                    <td class="text-center">3 max</td>
+                                    <td class="text-center"><strong>Illimités</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Rapports PDF</strong></td>
+                                    <td class="text-center">Avec filigrane</td>
+                                    <td class="text-center"><strong>Premium (badge PRO)</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Comparaison de projets</strong></td>
+                                    <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                                    <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email après audit</strong></td>
+                                    <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                                    <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Graphiques de tendance</strong></td>
+                                    <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                                    <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Archivage automatique</strong></td>
+                                    <td class="text-center">Après 30 jours</td>
+                                    <td class="text-center"><strong>Jamais</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ / Informations supplémentaires -->
+    <div class="row mt-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-4 text-center">
+                        <i class="fas fa-info-circle"></i> Informations importantes
+                    </h4>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">
+                                <i class="fas fa-shield-alt text-success"></i> Paiement sécurisé
+                            </h6>
+                            <p class="text-muted mb-0">
+                                Tous les paiements sont sécurisés par <strong>FedaPay</strong>
+                            </p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">
+                                <i class="fas fa-sync-alt text-primary"></i> Annulation facile
+                            </h6>
+                            <p class="text-muted mb-0">
+                                Changez ou annulez votre plan à tout moment
+                            </p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">
+                                <i class="fas fa-calendar-check text-warning"></i> Facturation mensuelle
+                            </h6>
+                            <p class="text-muted mb-0">
+                                Abonnement mensuel sans engagement de durée
+                            </p>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">
+                                <i class="fas fa-headset text-info"></i> Support dédié
+                            </h6>
+                            <p class="text-muted mb-0">
+                                Notre équipe vous accompagne dans votre utilisation
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="mb-2">
+                            <strong>Des questions ?</strong> Contactez-nous :
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-envelope"></i> contact@voltixaudit.com |
+                            <i class="fas fa-phone"></i> +229 XX XX XX XX
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

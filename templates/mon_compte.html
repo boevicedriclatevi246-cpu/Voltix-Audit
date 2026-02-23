@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block title %}Mon Compte - Voltix Audit{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--voltix-blue);">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="{{ url_for('accueil') }}">
+            <i class="fas fa-bolt"></i> Voltix Audit
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('accueil') }}">
+                        <i class="fas fa-home"></i> Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('liste_projets') }}">
+                        <i class="fas fa-folder"></i> Projets
+                    </a>
+                </li>
+                {% if current_user.plan == 'pro' %}
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('comparer_projets') }}">
+            <i class="fas fa-balance-scale"></i> Comparer
+        </a>
+    </li>
+{% endif %}
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('mon_compte') }}">
+                        <i class="fas fa-user"></i> Mon compte
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('deconnexion') }}">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <div class="row">
+        <!-- Informations du compte -->
+        <div class="col-lg-8 mx-auto">
+
+            <h2 class="mb-4">
+                <i class="fas fa-user-circle"></i> Mon compte
+            </h2>
+
+            <!-- Carte profil -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title border-bottom pb-2 mb-3">
+                        <i class="fas fa-id-card"></i> Informations personnelles
+                    </h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">Nom complet</div>
+                        <div class="col-md-8 fw-bold">{{ current_user.nom_complet }}</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">Email</div>
+                        <div class="col-md-8 fw-bold">{{ current_user.email }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte plan -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title border-bottom pb-2 mb-3">
+                        <i class="fas fa-gem"></i> Votre abonnement
+                    </h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">Plan actuel</div>
+                        <div class="col-md-8">
+                            <span class="badge bg-{{ 'success' if current_user.plan == 'entreprise' else 'primary' if current_user.plan == 'pro' else 'secondary' }} fs-6">
+                                {{ current_user.plan|capitalize }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">Audits ce mois</div>
+                        <div class="col-md-8 fw-bold">
+                            {{ current_user.audits_utilises }} / {{ current_user.audits_max if current_user.audits_max != -1 else '∞' }}
+                        </div>
+                    </div>
+
+                    {% if current_user.plan == 'gratuit' %}
+                    <div class="alert alert-warning mt-3" role="alert">
+                        <i class="fas fa-crown"></i>
+                        <strong>Passez au plan Pro ou Entreprise</strong> pour débloquer plus d'audits et de fonctionnalités !
+                        <a href="#" class="alert-link">En savoir plus</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="card-title border-bottom pb-2 mb-3">
+                        <i class="fas fa-cog"></i> Paramètres
+                    </h5>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary text-start">
+                            <i class="fas fa-key"></i> Changer de mot de passe
+                        </button>
+                        <button class="btn btn-outline-primary text-start">
+                            <i class="fas fa-bell"></i> Notifications
+                        </button>
+                        <hr>
+                        <a href="{{ url_for('deconnexion') }}" class="btn btn-outline-danger text-start">
+                            <i class="fas fa-sign-out-alt"></i> Se déconnecter
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+<!-- Audits utilisés ce mois -->
+<div class="col-md-6 mb-3">
+    <label class="form-label fw-bold">
+        <i class="fas fa-chart-bar"></i> Audits ce mois
+    </label>
+    <div class="input-group">
+        <input type="text" class="form-control"
+               value="{{ current_user.audits_utilises_ce_mois }} / {{ current_user.audits_max_mois }}"
+               readonly>
+        <span class="input-group-text">
+            {% set pourcentage = (current_user.audits_utilises_ce_mois / current_user.audits_max_mois * 100) if current_user.audits_max_mois > 0 else 0 %}
+            {{ pourcentage|round|int }}%
+        </span>
+    </div>
+    <div class="progress mt-2" style="height: 8px;">
+        <div class="progress-bar" role="progressbar"
+             style="width: {{ pourcentage }}%;"
+             aria-valuenow="{{ pourcentage }}"
+             aria-valuemin="0"
+             aria-valuemax="100">
+        </div>
+    </div>
+    {% if current_user.audits_max_mois - current_user.audits_utilises_ce_mois == 0 %}
+        <small class="text-danger">
+            <i class="fas fa-exclamation-triangle"></i> Limite atteinte -
+            <a href="{{ url_for('tarifs') }}">Passer au plan Pro</a>
+        </small>
+    {% endif %}
+
+    <!-- Graphiques de tendance (PRO uniquement) -->
+    {% if current_user.plan == 'pro' and stats_audits %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-lg">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-chart-line"></i> Graphiques de tendance
+                        <span class="badge bg-success ms-2">PRO</span>
+                    </h5>
+
+                    <!-- Graphique évolution consommation -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Évolution de la consommation énergétique</h6>
+                        <canvas id="chartConsommation" width="400" height="150"></canvas>
+                    </div>
+
+                    <hr>
+
+                    <!-- Graphique nombre d'audits par mois -->
+                    <div class="mb-2">
+                        <h6 class="fw-bold mb-3">Nombre d'audits réalisés par mois</h6>
+                        <canvas id="chartAudits" width="400" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if current_user.plan == 'pro' and stats_audits %}
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// Données pour les graphiques
+const statsAudits = {{ stats_audits|tojson }};
+
+// Graphique 1 : Évolution de la consommation
+const ctxConso = document.getElementById('chartConsommation').getContext('2d');
+const chartConsommation = new Chart(ctxConso, {
+    type: 'line',
+    data: {
+        labels: statsAudits.map(s => s.projet_nom),
+        datasets: [{
+            label: 'Consommation (kWh/an)',
+            data: statsAudits.map(s => s.consommation),
+            borderColor: '#58cc02',
+            backgroundColor: 'rgba(88, 204, 2, 0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: '#58cc02',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    font: {
+                        size: 14,
+                        weight: 'bold'
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12,
+                titleFont: {
+                    size: 14,
+                    weight: 'bold'
+                },
+                bodyFont: {
+                    size: 13
+                },
+                callbacks: {
+                    label: function(context) {
+                        return context.parsed.y.toLocaleString() + ' kWh/an';
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return value.toLocaleString() + ' kWh';
+                    },
+                    font: {
+                        size: 12
+                    }
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                }
+            },
+            x: {
+                ticks: {
+                    font: {
+                        size: 12
+                    }
+                },
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+
+// Graphique 2 : Nombre d'audits par mois (données groupées)
+const auditsParMois = {};
+statsAudits.forEach(s => {
+    const mois = s.mois;
+    auditsParMois[mois] = (auditsParMois[mois] || 0) + 1;
+});
+
+const moisLabels = Object.keys(auditsParMois);
+const auditsCount = Object.values(auditsParMois);
+
+const ctxAudits = document.getElementById('chartAudits').getContext('2d');
+const chartAudits = new Chart(ctxAudits, {
+    type: 'bar',
+    data: {
+        labels: moisLabels,
+        datasets: [{
+            label: 'Nombre d\'audits',
+            data: auditsCount,
+            backgroundColor: '#58cc02',
+            borderColor: '#43a102',
+            borderWidth: 2,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    font: {
+                        size: 14,
+                        weight: 'bold'
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12,
+                titleFont: {
+                    size: 14,
+                    weight: 'bold'
+                },
+                bodyFont: {
+                    size: 13
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    font: {
+                        size: 12
+                    }
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                }
+            },
+            x: {
+                ticks: {
+                    font: {
+                        size: 12
+                    }
+                },
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+
+{% endif %}
+
+    {% endif %}
+
+</div>

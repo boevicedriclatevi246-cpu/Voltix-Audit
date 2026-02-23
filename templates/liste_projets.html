@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Mes Projets - Voltix Audit{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--voltix-blue);">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="{{ url_for('accueil') }}">
+            <i class="fas fa-bolt"></i> Voltix Audit
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('accueil') }}">
+                        <i class="fas fa-home"></i> Accueil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('liste_projets') }}">
+                        <i class="fas fa-folder"></i> Projets
+                    </a>
+                </li>
+                {% if current_user.plan == 'pro' %}
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('comparer_projets') }}">
+            <i class="fas fa-balance-scale"></i> Comparer
+        </a>
+    </li>
+{% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('mon_compte') }}">
+                        <i class="fas fa-user"></i> Mon compte
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('deconnexion') }}">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Contenu -->
+<div class="container mt-4">
+
+    <!-- En-tête -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="mb-0">
+                <i class="fas fa-folder-open"></i> Mes projets
+            </h2>
+            <p class="text-muted">{{ projets|length }} projet(s)</p>
+        </div>
+<div class="col-md-4 text-md-end">
+    <a href="{{ url_for('nouveau_projet') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nouveau projet
+    </a>
+
+    {% if current_user.plan == 'gratuit' %}
+        <small class="text-muted d-block mt-2">
+            <i class="fas fa-info-circle"></i>
+            {{ projets|length }}/3 projets actifs
+            {% if projets|length >= 3 %}
+                <br>
+                <span class="text-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Limite atteinte - <a href="{{ url_for('tarifs') }}">Passer à Pro</a>
+                </span>
+            {% endif %}
+        </small>
+    {% endif %}
+</div>
+
+    <!-- Filtres -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary active">
+                    <i class="fas fa-border-all"></i> Tous
+                </button>
+                <button type="button" class="btn btn-outline-primary">
+                    <i class="fas fa-spinner"></i> En cours
+                </button>
+                <button type="button" class="btn btn-outline-primary">
+                    <i class="fas fa-check"></i> Terminés
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des projets -->
+    <div class="row">
+        {% if projets %}
+            {% for projet in projets %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body">
+                        <!-- Statut badge -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0">{{ projet.nom_projet }}</h5>
+                            <span class="badge bg-{{ 'success' if projet.statut == 'termine' else 'warning' if projet.statut == 'en_cours' else 'secondary' }}">
+                                {% if projet.statut == 'termine' %}
+                                    <i class="fas fa-check"></i> Terminé
+                                {% elif projet.statut == 'en_cours' %}
+                                    <i class="fas fa-spinner"></i> En cours
+                                {% else %}
+                                    <i class="fas fa-exclamation"></i> Incomplet
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <!-- Info projet -->
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-building"></i> {{ projet.client_nom }}
+                        </p>
+                        <p class="text-muted small mb-3">
+                            <i class="fas fa-industry"></i> {{ projet.type_batiment }}
+                        </p>
+
+                        <!-- Progression -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="text-muted">Progression</small>
+                                <small class="fw-bold text-primary">{{ projet.pourcentage_completion }}%</small>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-primary" role="progressbar"
+                                     style="width: {{ projet.pourcentage_completion }}%;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date -->
+                        <p class="text-muted small mb-3">
+                            <i class="fas fa-calendar"></i> Créé le {{ projet.date_creation[:10] }}
+                        </p>
+
+                        <!-- Actions -->
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('detail_projet', projet_id=projet.id) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye"></i> Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="card border-0 bg-light">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-folder-open fa-5x text-muted mb-4"></i>
+                        <h4 class="text-muted">Aucun projet</h4>
+                        <p class="text-muted">Vous n'avez pas encore créé de projet.</p>
+                        <a href="{{ url_for('nouveau_projet') }}" class="btn btn-primary btn-lg mt-3">
+                            <i class="fas fa-plus"></i> Créer mon premier projet
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+}
+</style>
+{% endblock %}
+    </div>
