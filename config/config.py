@@ -28,6 +28,16 @@ ICONS_DIR = ASSETS_DIR / 'icons'
 for directory in [DATABASE_PATH.parent, RAPPORTS_DIR, IMAGES_DIR, ICONS_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
 
+import os
+
+# Base de données
+DATABASE_TYPE = os.environ.get('DATABASE_TYPE', 'sqlite')  # sqlite ou postgresql
+
+if DATABASE_TYPE == 'postgresql':
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+else:
+    DATABASE_PATH = os.path.join(BASE_DIR, 'data', 'voltix_audit.db')
+
 # ========================================
 # INFORMATIONS APPLICATION
 # ========================================
