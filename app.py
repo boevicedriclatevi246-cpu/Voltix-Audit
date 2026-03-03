@@ -769,56 +769,76 @@ def nouvel_equipement(projet_id, piece_id):
 
     # Récupérer les données du formulaire
     type_equipement = request.form.get('type_equipement')
+    puissance_w = int(request.form.get('puissance', 0))  # Nouveau champ séparé
     quantite = int(request.form.get('quantite', 1))
     heures_jour = float(request.form.get('heures_jour', 8))
     jours_semaine = int(request.form.get('jours_semaine', 5))
 
     print(f"\n🔌 Ajout équipement:")
     print(f"   Type: {type_equipement}")
+    print(f"   Puissance: {puissance_w}W")
     print(f"   Quantité: {quantite}")
     print(f"   Heures/jour: {heures_jour}")
     print(f"   Jours/semaine: {jours_semaine}")
 
-    # Extraire le nom et la puissance du type_equipement
-    # Format: "Nom de l'équipement (XXXXw)"
-    import re
-    match = re.search(r'(.+?)\s*\((\d+)W\)', type_equipement)
-
-    if match:
-        nom_equipement = match.group(1).strip()
-        puissance_w = int(match.group(2))
-    else:
-        flash("Format d'équipement invalide", "error")
+    # Validation
+    if not type_equipement or puissance_w <= 0:
+        flash("Veuillez renseigner un équipement et une puissance valide", "error")
         return redirect(url_for('detail_piece', projet_id=projet_id, piece_id=piece_id))
+
+    # Le nom de l'équipement est directement type_equipement (sans extraction)
+    nom_equipement = type_equipement
 
     # Déterminer la catégorie
     categories = {
         'LED': 'Éclairage',
         'Ampoule': 'Éclairage',
         'Tube': 'Éclairage',
+        'Spot': 'Éclairage',
+        'Néon': 'Éclairage',
+        'Lampe': 'Éclairage',
         'Climatiseur': 'Climatisation',
         'Ventilateur': 'Climatisation',
+        'Brasseur': 'Climatisation',
         'Réfrigérateur': 'Réfrigération',
         'Congélateur': 'Réfrigération',
+        'Cave à vin': 'Réfrigération',
         'Micro-ondes': 'Cuisson',
         'Four': 'Cuisson',
         'Plaque': 'Cuisson',
+        'Cuisinière': 'Cuisson',
         'Bouilloire': 'Cuisson',
         'Cafetière': 'Cuisson',
+        'Grille-pain': 'Cuisson',
+        'Friteuse': 'Cuisson',
         'Ordinateur': 'Informatique',
         'Écran': 'Informatique',
         'Imprimante': 'Informatique',
         'Photocopieuse': 'Informatique',
+        'Scanner': 'Informatique',
+        'Serveur': 'Informatique',
         'Télévision': 'Électronique',
-        'Routeur': 'Électronique',
+        'Décodeur': 'Électronique',
+        'Chaîne': 'Électronique',
+        'Barre de son': 'Électronique',
         'Projecteur': 'Électronique',
-        'Chauffe-eau': 'Électroménager',
-        'Machine': 'Électroménager',
+        'Console': 'Électronique',
+        'Routeur': 'Réseau',
+        'Switch': 'Réseau',
+        'Modem': 'Réseau',
+        'Point d\'accès': 'Réseau',
+        'Chargeur': 'Réseau',
+        'Machine à laver': 'Électroménager',
         'Sèche-linge': 'Électroménager',
+        'Lave-vaisselle': 'Électroménager',
+        'Chauffe-eau': 'Électroménager',
         'Fer': 'Électroménager',
         'Aspirateur': 'Électroménager',
-        'Pompe': 'Autres',
-        'Chargeur': 'Autres'
+        'Pompe': 'Technique',
+        'Surpresseur': 'Technique',
+        'Système d\'alarme': 'Technique',
+        'Caméra': 'Technique',
+        'Onduleur': 'Technique'
     }
 
     categorie = 'Autres'
@@ -827,8 +847,7 @@ def nouvel_equipement(projet_id, piece_id):
             categorie = cat
             break
 
-    print(f"   Nom extrait: {nom_equipement}")
-    print(f"   Puissance: {puissance_w}W")
+    print(f"   Nom: {nom_equipement}")
     print(f"   Catégorie: {categorie}")
 
     # Ajouter l'équipement
@@ -844,7 +863,7 @@ def nouvel_equipement(projet_id, piece_id):
 
     if equipement_id:
         print(f"✅ Équipement ajouté avec ID: {equipement_id}")
-        flash(f"Équipement '{nom_equipement}' ajouté avec succès !", "success")
+        flash(f"Équipement '{nom_equipement}' ({puissance_w}W) ajouté avec succès !", "success")
     else:
         print("❌ Erreur ajout équipement")
         flash("Erreur lors de l'ajout de l'équipement", "error")
@@ -1026,36 +1045,70 @@ def calculer_audit(projet_id):
 @login_required
 def resultats_audit(projet_id):
     """Afficher les résultats de l'audit"""
+
+    conn = db_manager.get_connection()
+    cursor = conn.cursor()
+
     # Récupérer le projet
-    projet = db_manager.get_connection().execute(
+    cursor.execute(
         "SELECT * FROM projets WHERE id = ? AND utilisateur_id = ?",
         (projet_id, current_user.id)
-    ).fetchone()
+    )
+    projet_row = cursor.fetchone()
 
-    if not projet:
+    if not projet_row:
+        conn.close()
         flash("Projet introuvable", "error")
         return redirect(url_for('liste_projets'))
 
+    projet = dict(projet_row)
+
     # Récupérer les résultats
-    resultats = db_manager.get_connection().execute(
+    cursor.execute(
         "SELECT * FROM resultats_audits WHERE projet_id = ? ORDER BY date_calcul DESC LIMIT 1",
         (projet_id,)
-    ).fetchone()
+    )
+    resultats_row = cursor.fetchone()
 
-    if not resultats:
+    if not resultats_row:
+        conn.close()
         flash("Aucun résultat disponible. Calculez d'abord l'audit.", "warning")
         return redirect(url_for('detail_projet', projet_id=projet_id))
 
+    resultats = dict(resultats_row)
+
+    # Calculer consommation_kwh_m2_an si elle n'existe pas
+    if 'consommation_kwh_m2_an' not in resultats or not resultats.get('consommation_kwh_m2_an'):
+        # Récupérer la surface depuis le bâtiment
+        cursor.execute(
+            "SELECT surface_totale FROM batiments WHERE projet_id = ?",
+            (projet_id,)
+        )
+        batiment_row = cursor.fetchone()
+        surface = batiment_row[0] if batiment_row and batiment_row[0] else 100
+
+        if surface and surface > 0:
+            resultats['consommation_kwh_m2_an'] = resultats['consommation_totale_kwh_an'] / surface
+            resultats['surface_totale'] = surface
+        else:
+            resultats['consommation_kwh_m2_an'] = resultats['consommation_totale_kwh_an'] / 100
+            resultats['surface_totale'] = 100
+
     # Récupérer les recommandations
-    recommandations = db_manager.get_connection().execute(
+    cursor.execute(
         "SELECT * FROM recommandations WHERE projet_id = ? ORDER BY priorite, economie_estimee_fcfa DESC",
         (projet_id,)
-    ).fetchall()
+    )
+    recommandations_rows = cursor.fetchall()
+
+    conn.close()
+
+    recommandations = [dict(r) for r in recommandations_rows]
 
     return render_template('resultats_audit.html',
-                           projet=dict(projet),
-                           resultats=dict(resultats),
-                           recommandations=[dict(r) for r in recommandations])
+                           projet=projet,
+                           resultats=resultats,
+                           recommandations=recommandations)
 
 
 @app.route('/projet/<int:projet_id>/generer-pdf')

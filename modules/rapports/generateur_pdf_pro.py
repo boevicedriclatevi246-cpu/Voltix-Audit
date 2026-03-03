@@ -21,6 +21,7 @@ try:
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
     from reportlab.pdfgen import canvas
+    from modules.calculs.verification_uemoa import verificateur_uemoa
 
     REPORTLAB_AVAILABLE = True
 except ImportError:
@@ -120,6 +121,10 @@ class GenerateurPDFPro:
 
             # PAGES 12-17 : Recommandations (1 page par reco)
             story.extend(self._creer_recommandations_detaillees(donnees, styles))
+
+            # PAGE 11-12 : Conformité UEMOA (NOUVELLE SECTION)
+            story.append(PageBreak())
+            story.extend(self._creer_section_conformite_uemoa(donnees, styles))
 
             # PAGES 18-19 : Plan d'action et aides
             story.extend(self._creer_plan_action(donnees, styles))
@@ -332,7 +337,8 @@ class GenerateurPDFPro:
         # Tableau récapitulatif
         recap_data = [
             ['INDICATEUR', 'VALEUR'],
-            ['Consommation annuelle', f"{resultats['consommation_totale_kwh_an']:,.0f} kWh/an".replace(',', ' ')],
+            ['Consommation annuelle', f"{float(resultats.get('consommation_kwh_m2_an') or resultats.get('consommation_totale_kwh_an', 0) / 100):.1f} kWh/m²/an".replace( ',', ' ')],
+            ['Consommation totale', f"{resultats['consommation_totale_kwh_an']:,.0f} kWh/an".replace(',', ' ')],
             ['Coût annuel', f"{resultats['cout_annuel_fcfa']:,.0f} FCFA/an".replace(',', ' ')],
             ['Émissions ', f"{resultats['emissions_co2_kg_an']:,.0f} kg C02/an".replace(',', ' ')],
             ['Score de performance', f"{resultats['score_performance']}/100"],
@@ -526,6 +532,7 @@ class GenerateurPDFPro:
         # Tableau détaillé
         detail_data = [
             ['INDICATEUR', 'VALEUR', 'UNITÉ'],
+            ['Consommation par m²', f"{resultats.get('consommation_kwh_m2_an', resultats['consommation_totale_kwh_an'] / 100):.1f}".replace(',', ' '), 'kWh/m²/an'],
             ['Consommation totale', f"{resultats['consommation_totale_kwh_an']:,.0f}".replace(',', ' '), 'kWh/an'],
             ['Coût annuel', f"{resultats['cout_annuel_fcfa']:,.0f}".replace(',', ' '), 'FCFA/an'],
             ['Émissions C02', f"{resultats['emissions_co2_kg_an']:,.0f}".replace(',', ' '), 'kg/an'],
@@ -702,6 +709,330 @@ class GenerateurPDFPro:
 
         return elements
 
+    def _creer_section_conformite_uemoa(self, donnees, styles):
+        """
+        Crée la section conformité directives UEMOA
+        NOUVELLE SECTION - Affiche la conformité réglementaire
+        """
+        elements = []
+
+        elements.append(Paragraph("CONFORMITÉ RÉGLEMENTAIRE UEMOA", styles['SectionTitle']))
+        elements.append(Spacer(1, 0.5 * cm))
+
+        # Encadré introduction
+        intro_html = """
+        <para align=justify>
+        L'Union Économique et Monétaire Ouest-Africaine (UEMOA) a adopté deux directives 
+        en 2020 pour promouvoir l'efficacité énergétique dans ses 8 États membres 
+        (Bénin, Burkina Faso, Côte d'Ivoire, Guinée-Bissau, Mali, Niger, Sénégal, Togo) :
+        <br/><br/>
+        • <b>Directive N°04/2020/CM/UEMOA</b> : Étiquetage énergétique des lampes 
+        électriques et des appareils électroménagers neufs<br/>
+        • <b>Directive N°05/2020/CM/UEMOA</b> : Mesures d'efficacité énergétique 
+        dans la construction des bâtiments<br/>
+        <br/>
+        Cette section évalue la conformité de votre installation à ces exigences réglementaires.
+        </para>
+        """
+        elements.append(Paragraph(intro_html, styles['Normal']))
+        elements.append(Spacer(1, 1 * cm))
+
+        # ========================================
+        # DIRECTIVE 04/2020 - ÉQUIPEMENTS
+        # ========================================
+
+        elements.append(
+            Paragraph("1. Directive N°04/2020 - Étiquetage énergétique des équipements", styles['SubsectionTitle']))
+        elements.append(Spacer(1, 0.3 * cm))
+
+        # Récupérer analyse conformité
+        resultats = donnees['resultats']
+        projet_id = donnees['projet']['id']
+
+        # Analyser conformité équipements
+        analyse = verificateur_uemoa.analyser_equipements_projet(projet_id)
+
+        # Tableau conformité par catégorie
+        data_equipements = [
+            ['CATÉGORIE', 'CONFORMES', 'NON CONFORMES', 'TOTAL', 'TAUX', 'STATUT']
+        ]
+
+        stats = analyse['stats_par_categorie']
+
+        for categorie in ['Éclairage', 'Climatisation', 'Réfrigération', 'Autres']:
+            conformes = stats.get(categorie, {}).get('conformes', 0)
+            non_conformes = stats.get(categorie, {}).get('non_conformes', 0)
+            total = conformes + non_conformes
+
+            if total == 0:
+                continue
+
+            taux = (conformes / total * 100) if total > 0 else 0
+
+            if taux >= 80:
+                statut = '✅ CONFORME'
+                couleur = colors.HexColor('#27ae60')
+            elif taux >= 50:
+                statut = '⚠️ À AMÉLIORER'
+                couleur = colors.HexColor('#f39c12')
+            else:
+                statut = '❌ NON CONFORME'
+                couleur = colors.HexColor('#e74c3c')
+
+            data_equipements.append([
+                categorie,
+                str(conformes),
+                str(non_conformes),
+                str(total),
+                f"{taux:.0f}%",
+                statut
+            ])
+
+        # Ligne TOTAL
+        total_conformes = analyse['nb_conformes']
+        total_non_conformes = analyse['nb_non_conformes']
+        total_general = total_conformes + total_non_conformes
+        taux_global = analyse['taux_conformite']
+
+        if taux_global >= 80:
+            statut_global = '✅ CONFORME'
+        elif taux_global >= 50:
+            statut_global = '⚠️ À AMÉLIORER'
+        else:
+            statut_global = '❌ NON CONFORME'
+
+        data_equipements.append([
+            'TOTAL',
+            str(total_conformes),
+            str(total_non_conformes),
+            str(total_general),
+            f"{taux_global:.0f}%",
+            statut_global
+        ])
+
+        table_eq = Table(data_equipements, colWidths=[4 * cm, 2.5 * cm, 2.5 * cm, 2 * cm, 2 * cm, 5 * cm])
+        table_eq.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a5490')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#f39c12')),
+            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+        ]))
+
+        elements.append(table_eq)
+        elements.append(Spacer(1, 0.5 * cm))
+
+        # Interprétation Directive 04
+        if taux_global >= 80:
+            interpretation_04 = """
+            <para textColor='#27ae60'>
+            <b>✅ CONFORME</b> - Votre installation respecte les exigences de la Directive N°04/2020 
+            concernant l'étiquetage énergétique des équipements. Plus de 80% de vos équipements 
+            sont conformes aux classes énergétiques recommandées.
+            </para>
+            """
+        elif taux_global >= 50:
+            interpretation_04 = """
+            <para textColor='#f39c12'>
+            <b>⚠️ PARTIELLEMENT CONFORME</b> - Des améliorations sont nécessaires pour atteindre 
+            le seuil de conformité de 80%. Consultez les recommandations pour identifier les 
+            équipements prioritaires à remplacer.
+            </para>
+            """
+        else:
+            interpretation_04 = """
+            <para textColor='#e74c3c'>
+            <b>❌ NON CONFORME</b> - Votre installation ne respecte pas les exigences de la 
+            Directive N°04/2020. Une mise en conformité urgente est requise, notamment pour 
+            l'éclairage LED et les équipements de climatisation performants.
+            </para>
+            """
+
+        elements.append(Paragraph(interpretation_04, styles['Normal']))
+        elements.append(Spacer(1, 1 * cm))
+
+        # ========================================
+        # DIRECTIVE 05/2020 - BÂTIMENT
+        # ========================================
+
+        elements.append(
+            Paragraph("2. Directive N°05/2020 - Efficacité énergétique du bâtiment", styles['SubsectionTitle']))
+        elements.append(Spacer(1, 0.3 * cm))
+
+        classe = resultats.get('classe_energie', 'G')
+        conso_m2 = float(resultats.get('consommation_kwh_m2_an') or
+                         resultats.get('consommation_totale_kwh_an', 0) / 100)
+
+        # Vérifier conformité bâtiment
+        verif_batiment = verificateur_uemoa.verifier_batiment(conso_m2)
+        conforme_batiment = verif_batiment['conforme_directive_05']
+
+        # Tableau performance bâtiment
+        data_batiment = [
+            ['CRITÈRE', 'VALEUR MESURÉE', 'EXIGENCE UEMOA', 'STATUT']
+        ]
+
+        # Ligne 1 : Classe énergétique
+        statut_classe = '✅ CONFORME' if conforme_batiment else '❌ NON CONFORME'
+        data_batiment.append([
+            'Classe énergétique',
+            f"Classe {classe}",
+            'Classe A, B ou C',
+            statut_classe
+        ])
+
+        # Ligne 2 : Consommation par m²
+        statut_conso = '✅ CONFORME' if conso_m2 <= 150 else '❌ NON CONFORME'
+        data_batiment.append([
+            'Consommation spécifique',
+            f"{conso_m2:.1f} kWh/m²/an",
+            '≤ 150 kWh/m²/an',
+            statut_conso
+        ])
+
+        # Ligne 3 : Isolation toiture (audit visuel requis)
+        data_batiment.append([
+            'Isolation toiture',
+            'À évaluer sur site',
+            'U ≤ 0,50 W/m²·K',
+            '⚠️ AUDIT REQUIS'
+        ])
+
+        # Ligne 4 : Ventilation naturelle
+        data_batiment.append([
+            'Ventilation naturelle',
+            'À évaluer sur site',
+            'Optimisée',
+            '⚠️ AUDIT REQUIS'
+        ])
+
+        # Ligne 5 : Protection solaire
+        data_batiment.append([
+            'Protection solaire',
+            'À évaluer sur site',
+            'Débords/brise-soleil',
+            '⚠️ AUDIT REQUIS'
+        ])
+
+        table_bat = Table(data_batiment, colWidths=[5 * cm, 4.5 * cm, 4.5 * cm, 4 * cm])
+        table_bat.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#27ae60')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ]))
+
+        elements.append(table_bat)
+        elements.append(Spacer(1, 0.5 * cm))
+
+        # Interprétation Directive 05
+        if conforme_batiment:
+            interpretation_05 = """
+            <para textColor='#27ae60'>
+            <b>✅ CONFORME</b> - Votre bâtiment respecte les exigences de performance 
+            énergétique de la Directive N°05/2020 avec une classe énergétique satisfaisante 
+            (A, B ou C) et une consommation spécifique inférieure à 150 kWh/m²/an.
+            </para>
+            """
+        else:
+            interpretation_05 = """
+            <para textColor='#e74c3c'>
+            <b>❌ NON CONFORME</b> - Votre bâtiment ne respecte pas les exigences de la 
+            Directive N°05/2020. Des améliorations de l'enveloppe thermique et des systèmes 
+            énergétiques sont nécessaires pour atteindre la conformité. Consultez les 
+            recommandations détaillées dans ce rapport.
+            </para>
+            """
+
+        elements.append(Paragraph(interpretation_05, styles['Normal']))
+        elements.append(Spacer(1, 1 * cm))
+
+        # ========================================
+        # CONCLUSION CONFORMITÉ GLOBALE
+        # ========================================
+
+        elements.append(Paragraph("Conclusion de conformité", styles['SubsectionTitle']))
+        elements.append(Spacer(1, 0.3 * cm))
+
+        conforme_global = (taux_global >= 80 and conforme_batiment)
+
+        if conforme_global:
+            conclusion_color = '#27ae60'
+            conclusion_titre = '✅ CONFORME AUX DIRECTIVES UEMOA'
+            conclusion_texte = """
+            Votre installation respecte les exigences des Directives UEMOA N°04/2020 et N°05/2020. 
+            Vous êtes en conformité avec la réglementation en vigueur dans l'espace UEMOA. 
+            Continuez à maintenir ce niveau de performance en appliquant les recommandations 
+            d'optimisation proposées dans ce rapport.
+            """
+        elif taux_global >= 50 or conforme_batiment:
+            conclusion_color = '#f39c12'
+            conclusion_titre = '⚠️ PARTIELLEMENT CONFORME'
+            conclusion_texte = """
+            Votre installation présente un niveau de conformité partiel aux Directives UEMOA. 
+            Des améliorations sont nécessaires pour atteindre la pleine conformité. Nous vous 
+            recommandons de suivre les recommandations prioritaires identifiées dans ce rapport, 
+            en particulier celles marquées comme "Conformité UEMOA".
+            """
+        else:
+            conclusion_color = '#e74c3c'
+            conclusion_titre = '❌ NON CONFORME - MISE EN CONFORMITÉ REQUISE'
+            conclusion_texte = """
+            Votre installation ne respecte pas les exigences des Directives UEMOA N°04/2020 
+            et N°05/2020. Une mise en conformité est requise. Les recommandations marquées 
+            "Conformité UEMOA" dans ce rapport doivent être traitées en priorité. 
+            Un planning de mise en conformité est fortement recommandé.
+            """
+
+        # Encadré conclusion
+        conclusion_html = f"""
+        <para align=center fontSize=14 textColor='{conclusion_color}'>
+        <b>{conclusion_titre}</b>
+        </para>
+        """
+        elements.append(Paragraph(conclusion_html, styles['Normal']))
+        elements.append(Spacer(1, 0.3 * cm))
+
+        elements.append(Paragraph(conclusion_texte, styles['Normal']))
+        elements.append(Spacer(1, 0.5 * cm))
+
+        # Tableau récapitulatif final
+        data_recap = [
+            ['DIRECTIVE', 'STATUT', 'TAUX/CLASSE'],
+            [
+                'N°04/2020 - Équipements',
+                '✅ CONFORME' if taux_global >= 80 else '❌ NON CONFORME',
+                f"{taux_global:.0f}%"
+            ],
+            [
+                'N°05/2020 - Bâtiment',
+                '✅ CONFORME' if conforme_batiment else '❌ NON CONFORME',
+                f"Classe {classe}"
+            ]
+        ]
+
+        table_recap = Table(data_recap, colWidths=[8 * cm, 6 * cm, 4 * cm])
+        table_recap.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a5490')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 11),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.lightgrey),
+        ]))
+
+        elements.append(table_recap)
+
+        return elements
+
     def _recuperer_donnees_completes(self, projet_id):
         """Récupère toutes les données nécessaires"""
         try:
@@ -783,9 +1114,23 @@ class GenerateurPDFPro:
                     'piece_nom': row[-1]
                 })
 
-            # Résultats
+            # Résultats - AVEC COLONNES UEMOA
             cursor.execute("""
-                SELECT * FROM resultats_audits 
+                SELECT 
+                    id,
+                    projet_id,
+                    consommation_totale_kwh_an,
+                    consommation_kwh_m2_an,
+                    classe_energie,
+                    emissions_co2_kg_an,
+                    cout_annuel_fcfa,
+                    score_performance,
+                    surface_totale,
+                    conforme_uemoa_04,
+                    conforme_uemoa_05,
+                    taux_conformite_equipements,
+                    date_calcul
+                FROM resultats_audits 
                 WHERE projet_id = ? 
                 ORDER BY date_calcul DESC 
                 LIMIT 1
@@ -796,12 +1141,22 @@ class GenerateurPDFPro:
             if not resultats_row:
                 return None
 
+            # Construire le dictionnaire avec les bonnes colonnes
             resultats = {
-                'consommation_totale_kwh_an': resultats_row[2] or 0,
-                'classe_energie': resultats_row[3] or 'G',
-                'emissions_co2_kg_an': resultats_row[4] or 0,
-                'cout_annuel_fcfa': resultats_row[5] or 0,
-                'score_performance': resultats_row[6] or 0
+                'consommation_totale_kwh_an': float(resultats_row[2]) if resultats_row[2] else 0,
+                'consommation_kwh_m2_an': float(resultats_row[3]) if resultats_row[3] else (
+                    float(resultats_row[2]) / 100 if resultats_row[2] else 0),
+                'classe_energie': resultats_row[4] or 'G',
+                'emissions_co2_kg_an': float(resultats_row[5]) if resultats_row[5] else 0,
+                'cout_annuel_fcfa': float(resultats_row[6]) if resultats_row[6] else 0,
+                'score_performance': int(resultats_row[7]) if resultats_row[7] else 50,
+                'surface_totale': float(resultats_row[8]) if resultats_row[8] else 100,
+                'conforme_uemoa_04': bool(resultats_row[9]) if len(resultats_row) > 9 and resultats_row[
+                    9] is not None else False,
+                'conforme_uemoa_05': bool(resultats_row[10]) if len(resultats_row) > 10 and resultats_row[
+                    10] is not None else False,
+                'taux_conformite_equipements': float(resultats_row[11]) if len(resultats_row) > 11 and resultats_row[
+                    11] is not None else 0
             }
 
             # Recommandations

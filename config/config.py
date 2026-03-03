@@ -325,3 +325,15 @@ FACTEUR_EMISSION_CO2 = {
 
 FEDAPAY_API_KEY = 'sk_sandbox_F8Tg00nzUoO1PMJaOTH1WBOU'  # Récupère depuis FedaPay
 FEDAPAY_MODE = 'sandbox'
+
+# Type de base de données
+DATABASE_TYPE = 'sqlite'  # ou 'postgresql' en production
+
+# Chemins base de données
+DATABASE_PATH = os.path.join(BASE_DIR, 'data', 'voltix_audit.db')
+
+# URL PostgreSQL (pour production uniquement)
+DATABASE_URL = os.environ.get('DATABASE_URL', None)  # AJOUTE CETTE LIGNE
+
+# Autres configs...
+

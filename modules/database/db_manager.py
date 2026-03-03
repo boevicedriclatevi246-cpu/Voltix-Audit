@@ -159,11 +159,13 @@ class DatabaseManager:
                     CREATE TABLE IF NOT EXISTS resultats_audits (
                         id SERIAL PRIMARY KEY,
                         projet_id INTEGER NOT NULL,
-                        classe_energetique VARCHAR(10) NOT NULL,
-                        consommation_annuelle_kwh REAL NOT NULL,
+                        consommation_totale_kwh_an REAL NOT NULL,
+                        consommation_kwh_m2_an REAL,
+                        classe_energie VARCHAR(10) NOT NULL,
                         emissions_co2_kg_an REAL NOT NULL,
                         cout_annuel_fcfa REAL NOT NULL,
                         score_performance INTEGER NOT NULL,
+                        surface_totale REAL,
                         date_calcul TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (projet_id) REFERENCES projets(id)
                     )
@@ -259,11 +261,13 @@ class DatabaseManager:
                     CREATE TABLE IF NOT EXISTS resultats_audits (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         projet_id INTEGER NOT NULL,
-                        classe_energetique TEXT NOT NULL,
-                        consommation_annuelle_kwh REAL NOT NULL,
+                        consommation_totale_kwh_an REAL NOT NULL,
+                        consommation_kwh_m2_an REAL,
+                        classe_energie TEXT NOT NULL,
                         emissions_co2_kg_an REAL NOT NULL,
                         cout_annuel_fcfa REAL NOT NULL,
                         score_performance INTEGER NOT NULL,
+                        surface_totale REAL,
                         date_calcul TEXT DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (projet_id) REFERENCES projets(id)
                     )
@@ -321,8 +325,8 @@ class DatabaseManager:
         conn.close()
         return user
 
-    def creer_utilisateur(self, email, mot_de_passe_hash, nom_complet, telephone):
-        """Crée un nouvel utilisateur"""
+    def creer_utilisateur(self, email, mot_de_passe_hash, nom_complet, telephone, pays='BJ', plan='gratuit', **kwargs):
+        """Crée un nouvel utilisateur (avec paramètres optionnels ignorés)"""
         conn = self.get_connection()
         cursor = conn.cursor()
 
@@ -333,7 +337,7 @@ class DatabaseManager:
                     VALUES (%s, %s, %s, %s)
                     RETURNING id
                 """, (email, mot_de_passe_hash, nom_complet, telephone))
-                user_id = cursor.fetchone()[0]
+                user_id = cursor.fetchone()[0]  # CORRECTION : récupérer l'ID
             else:
                 cursor.execute("""
                     INSERT INTO utilisateurs (email, mot_de_passe_hash, nom_complet, telephone)
@@ -569,6 +573,23 @@ class DatabaseManager:
             conn.close()
 
         return stats
+
+    # ========================================
+    # ALIAS POUR COMPATIBILITÉ
+    # ========================================
+
+    def get_utilisateur_by_email(self, email):
+        """Alias pour obtenir_utilisateur_par_email"""
+        return self.obtenir_utilisateur_par_email(email)
+
+    def get_utilisateur_by_id(self, user_id):
+        """Alias pour obtenir_utilisateur_par_id"""
+        return self.obtenir_utilisateur_par_id(user_id)
+
+    def create_utilisateur(self, email, mot_de_passe_hash, nom_complet, telephone):
+        """Alias pour creer_utilisateur"""
+        return self.creer_utilisateur(email, mot_de_passe_hash, nom_complet, telephone)
+
 
 # Instance globale
 db_manager = DatabaseManager()

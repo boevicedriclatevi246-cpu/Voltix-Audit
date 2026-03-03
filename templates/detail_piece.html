@@ -107,12 +107,12 @@
                 </h5>
                 <hr>
                 <ol class="mb-0">
-                    <li><strong>Sélectionnez un type d'équipement</strong> dans la liste déroulante (30 types disponibles)</li>
+                    <li><strong>Sélectionnez un type d'équipement</strong> dans la liste déroulante (catégories organisées)</li>
+                    <li><strong>La puissance typique se remplit automatiquement</strong> - vous pouvez la modifier si besoin</li>
                     <li><strong>Indiquez la quantité</strong> de cet équipement dans la pièce</li>
                     <li><strong>Précisez les heures d'utilisation par jour</strong> (exemple: 8h pour un ordinateur de bureau)</li>
                     <li><strong>Indiquez les jours d'utilisation par semaine</strong> (exemple: 5 jours pour du matériel de bureau)</li>
                     <li><strong>Cliquez sur "Ajouter"</strong> pour enregistrer l'équipement</li>
-                    <li><strong>Répétez</strong> pour tous les équipements de la pièce</li>
                 </ol>
             </div>
         </div>
@@ -122,88 +122,190 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <h5 class="card-title mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
                         <i class="fas fa-plus-circle"></i> Ajouter un équipement
-                    </h5>
-
+                    </h6>
+                </div>
+                <div class="card-body p-4">
                     <form method="POST" action="{{ url_for('nouvel_equipement', projet_id=projet.id, piece_id=piece.id) }}">
-                        <div class="row">
-
-                            <!-- Type d'équipement -->
-                            <div class="col-md-6 mb-3">
+                        <div class="row g-3">
+                            <!-- Sélection équipement -->
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-plug"></i> Type d'équipement
+                                    <i class="fas fa-tags"></i> Équipement
                                 </label>
-                                <select name="type_equipement" class="form-select" required>
+                                <select name="type_equipement" id="equipement-select" class="form-select" required>
                                     <option value="">Sélectionner un équipement</option>
-                                    <option value="Ampoule LED (10W)">💡 Ampoule LED (10W)</option>
-                                    <option value="Ampoule halogène (50W)">💡 Ampoule halogène (50W)</option>
-                                    <option value="Tube fluorescent (40W)">💡 Tube fluorescent (40W)</option>
-                                    <option value="Climatiseur split (2000W)">❄️ Climatiseur split (2000W)</option>
-                                    <option value="Climatiseur window (1500W)">❄️ Climatiseur window (1500W)</option>
-                                    <option value="Ventilateur de plafond (75W)">🌀 Ventilateur de plafond (75W)</option>
-                                    <option value="Ventilateur sur pied (50W)">🌀 Ventilateur sur pied (50W)</option>
-                                    <option value="Réfrigérateur (150W)">🧊 Réfrigérateur (150W)</option>
-                                    <option value="Congélateur (200W)">❄️ Congélateur (200W)</option>
-                                    <option value="Micro-ondes (1000W)">🔥 Micro-ondes (1000W)</option>
-                                    <option value="Four électrique (2500W)">🔥 Four électrique (2500W)</option>
-                                    <option value="Plaque de cuisson (2000W)">🔥 Plaque de cuisson (2000W)</option>
-                                    <option value="Bouilloire électrique (2000W)">☕ Bouilloire électrique (2000W)</option>
-                                    <option value="Cafetière (800W)">☕ Cafetière (800W)</option>
-                                    <option value="Ordinateur de bureau (300W)">💻 Ordinateur de bureau (300W)</option>
-                                    <option value="Ordinateur portable (65W)">💻 Ordinateur portable (65W)</option>
-                                    <option value="Écran d'ordinateur (40W)">🖥️ Écran d'ordinateur (40W)</option>
-                                    <option value="Imprimante laser (400W)">🖨️ Imprimante laser (400W)</option>
-                                    <option value="Photocopieuse (1500W)">📠 Photocopieuse (1500W)</option>
-                                    <option value="Télévision LED 32 pouces (50W)">📺 Télévision LED 32" (50W)</option>
-                                    <option value="Télévision LED 55 pouces (100W)">📺 Télévision LED 55" (100W)</option>
-                                    <option value="Chauffe-eau électrique (2000W)">🚿 Chauffe-eau électrique (2000W)</option>
-                                    <option value="Machine à laver (500W)">🧺 Machine à laver (500W)</option>
-                                    <option value="Sèche-linge (3000W)">👔 Sèche-linge (3000W)</option>
-                                    <option value="Fer à repasser (1200W)">👔 Fer à repasser (1200W)</option>
-                                    <option value="Aspirateur (1400W)">🧹 Aspirateur (1400W)</option>
-                                    <option value="Pompe à eau (750W)">💧 Pompe à eau (750W)</option>
-                                    <option value="Chargeur de téléphone (10W)">📱 Chargeur de téléphone (10W)</option>
-                                    <option value="Routeur WiFi (10W)">📡 Routeur WiFi (10W)</option>
-                                    <option value="Projecteur (250W)">📽️ Projecteur (250W)</option>
+
+                                    <!-- ÉCLAIRAGE -->
+                                    <optgroup label="💡 ÉCLAIRAGE">
+                                        <option value="Ampoule LED">💡 Ampoule LED (5-15W typique: 10W)</option>
+                                        <option value="Ampoule halogène">💡 Ampoule halogène (35-75W typique: 50W)</option>
+                                        <option value="Tube fluorescent">💡 Tube fluorescent (18-58W typique: 36W)</option>
+                                        <option value="Spot encastré LED">💡 Spot encastré LED (3-12W typique: 7W)</option>
+                                        <option value="Néon">💡 Néon (15-65W typique: 36W)</option>
+                                        <option value="Lampe de bureau">💡 Lampe de bureau (5-20W typique: 10W)</option>
+                                    </optgroup>
+
+                                    <!-- CLIMATISATION & VENTILATION -->
+                                    <optgroup label="❄️ CLIMATISATION & VENTILATION">
+                                        <option value="Climatiseur split inverter">❄️ Climatiseur split inverter (800-3500W typique: 1500W)</option>
+                                        <option value="Climatiseur split standard">❄️ Climatiseur split standard (1200-3000W typique: 2000W)</option>
+                                        <option value="Climatiseur window">❄️ Climatiseur window (1000-2000W typique: 1500W)</option>
+                                        <option value="Ventilateur de plafond">🌀 Ventilateur de plafond (50-100W typique: 75W)</option>
+                                        <option value="Ventilateur sur pied">🌀 Ventilateur sur pied (40-75W typique: 50W)</option>
+                                        <option value="Brasseur d'air">🌀 Brasseur d'air (100-300W typique: 200W)</option>
+                                    </optgroup>
+
+                                    <!-- RÉFRIGÉRATION -->
+                                    <optgroup label="🧊 RÉFRIGÉRATION">
+                                        <option value="Réfrigérateur">🧊 Réfrigérateur (100-250W typique: 150W)</option>
+                                        <option value="Congélateur">❄️ Congélateur (150-300W typique: 200W)</option>
+                                        <option value="Réfrigérateur-congélateur">🧊 Réfrigérateur-congélateur (150-400W typique: 250W)</option>
+                                        <option value="Mini-réfrigérateur">🧊 Mini-réfrigérateur (50-100W typique: 70W)</option>
+                                        <option value="Cave à vin">🍷 Cave à vin (100-200W typique: 150W)</option>
+                                    </optgroup>
+
+                                    <!-- CUISSON -->
+                                    <optgroup label="🔥 CUISSON">
+                                        <option value="Micro-ondes">🔥 Micro-ondes (700-1200W typique: 1000W)</option>
+                                        <option value="Four électrique">🔥 Four électrique (2000-3500W typique: 2500W)</option>
+                                        <option value="Plaque de cuisson">🔥 Plaque de cuisson (1500-3000W typique: 2000W)</option>
+                                        <option value="Cuisinière électrique">🔥 Cuisinière électrique (2500-5000W typique: 3500W)</option>
+                                        <option value="Bouilloire électrique">☕ Bouilloire électrique (1500-2500W typique: 2000W)</option>
+                                        <option value="Cafetière">☕ Cafetière (600-1200W typique: 800W)</option>
+                                        <option value="Grille-pain">🍞 Grille-pain (800-1500W typique: 1000W)</option>
+                                        <option value="Friteuse électrique">🍟 Friteuse électrique (1500-2500W typique: 2000W)</option>
+                                    </optgroup>
+
+                                    <!-- INFORMATIQUE & BUREAUTIQUE -->
+                                    <optgroup label="💻 INFORMATIQUE & BUREAUTIQUE">
+                                        <option value="Ordinateur de bureau">💻 Ordinateur de bureau (200-500W typique: 300W)</option>
+                                        <option value="Ordinateur portable">💻 Ordinateur portable (45-90W typique: 65W)</option>
+                                        <option value="Écran d'ordinateur">🖥️ Écran d'ordinateur (20-60W typique: 40W)</option>
+                                        <option value="Imprimante laser">🖨️ Imprimante laser (300-600W typique: 400W)</option>
+                                        <option value="Imprimante jet d'encre">🖨️ Imprimante jet d'encre (10-30W typique: 15W)</option>
+                                        <option value="Photocopieuse">📠 Photocopieuse (1000-2000W typique: 1500W)</option>
+                                        <option value="Scanner">📄 Scanner (10-30W typique: 15W)</option>
+                                        <option value="Serveur informatique">🖥️ Serveur informatique (300-1000W typique: 500W)</option>
+                                    </optgroup>
+
+                                    <!-- ÉLECTRONIQUE & MULTIMÉDIA -->
+                                    <optgroup label="📺 ÉLECTRONIQUE & MULTIMÉDIA">
+                                        <option value="Télévision LED 32 pouces">📺 Télévision LED 32" (30-70W typique: 50W)</option>
+                                        <option value="Télévision LED 43 pouces">📺 Télévision LED 43" (50-90W typique: 70W)</option>
+                                        <option value="Télévision LED 55 pouces">📺 Télévision LED 55" (80-150W typique: 100W)</option>
+                                        <option value="Télévision LED 65 pouces">📺 Télévision LED 65" (120-200W typique: 150W)</option>
+                                        <option value="Décodeur TV">📺 Décodeur TV (10-30W typique: 15W)</option>
+                                        <option value="Chaîne Hi-Fi">🎵 Chaîne Hi-Fi (50-200W typique: 100W)</option>
+                                        <option value="Barre de son">🔊 Barre de son (30-100W typique: 50W)</option>
+                                        <option value="Projecteur">📽️ Projecteur (150-400W typique: 250W)</option>
+                                        <option value="Console de jeux">🎮 Console de jeux (100-200W typique: 150W)</option>
+                                    </optgroup>
+
+                                    <!-- ÉLECTROMÉNAGER -->
+                                    <optgroup label="🏠 ÉLECTROMÉNAGER">
+                                        <option value="Machine à laver">🧺 Machine à laver (300-800W typique: 500W)</option>
+                                        <option value="Sèche-linge">👔 Sèche-linge (2000-4000W typique: 3000W)</option>
+                                        <option value="Lave-vaisselle">🍽️ Lave-vaisselle (1200-2000W typique: 1500W)</option>
+                                        <option value="Fer à repasser">👔 Fer à repasser (1000-1500W typique: 1200W)</option>
+                                        <option value="Aspirateur">🧹 Aspirateur (1000-2000W typique: 1400W)</option>
+                                        <option value="Aspirateur robot">🤖 Aspirateur robot (20-50W typique: 30W)</option>
+                                        <option value="Chauffe-eau électrique">🚿 Chauffe-eau électrique (1500-3000W typique: 2000W)</option>
+                                    </optgroup>
+
+                                    <!-- RÉSEAU & CONNECTIVITÉ -->
+                                    <optgroup label="📡 RÉSEAU & CONNECTIVITÉ">
+                                        <option value="Routeur WiFi">📡 Routeur WiFi (5-15W typique: 10W)</option>
+                                        <option value="Switch réseau">🔌 Switch réseau (5-20W typique: 10W)</option>
+                                        <option value="Modem">📡 Modem (5-15W typique: 10W)</option>
+                                        <option value="Point d'accès WiFi">📶 Point d'accès WiFi (5-15W typique: 10W)</option>
+                                        <option value="Chargeur de téléphone">📱 Chargeur de téléphone (5-20W typique: 10W)</option>
+                                    </optgroup>
+
+                                    <!-- ÉQUIPEMENTS TECHNIQUES -->
+                                    <optgroup label="⚙️ ÉQUIPEMENTS TECHNIQUES">
+                                        <option value="Pompe à eau">💧 Pompe à eau (500-1500W typique: 750W)</option>
+                                        <option value="Surpresseur">💧 Surpresseur (600-1200W typique: 800W)</option>
+                                        <option value="Système d'alarme">🔔 Système d'alarme (10-50W typique: 20W)</option>
+                                        <option value="Caméra de surveillance">📹 Caméra de surveillance (5-15W typique: 10W)</option>
+                                        <option value="Onduleur UPS">🔋 Onduleur UPS (500-2000W typique: 1000W)</option>
+                                    </optgroup>
+
+                                    <!-- AUTRE -->
+                                    <optgroup label="➕ AUTRE">
+                                        <option value="Autre équipement">➕ Autre équipement (Personnalisé)</option>
+                                    </optgroup>
                                 </select>
-                                <small class="text-muted">Choisissez le type d'équipement à ajouter</small>
+                            </div>
+
+                            <!-- Puissance personnalisable -->
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-bolt"></i> Puissance (W)
+                                </label>
+                                <input type="number"
+                                       name="puissance"
+                                       id="puissance-input"
+                                       class="form-control"
+                                       min="1"
+                                       max="10000"
+                                       placeholder="Ex: 50"
+                                       required>
+                                <small class="text-muted" id="suggestion-puissance"></small>
                             </div>
 
                             <!-- Quantité -->
-                            <div class="col-md-2 mb-3">
+                            <div class="col-md-3">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-hashtag"></i> Quantité
+                                    <i class="fas fa-sort-numeric-up"></i> Quantité
                                 </label>
-                                <input type="number" name="quantite" class="form-control" value="1" min="1" required>
-                                <small class="text-muted">Nombre d'unités</small>
+                                <input type="number"
+                                       name="quantite"
+                                       class="form-control"
+                                       min="1"
+                                       max="100"
+                                       value="1"
+                                       required>
                             </div>
 
                             <!-- Heures/jour -->
-                            <div class="col-md-2 mb-3">
+                            <div class="col-md-4">
                                 <label class="form-label fw-bold">
                                     <i class="fas fa-clock"></i> Heures/jour
                                 </label>
-                                <input type="number" name="heures_jour" class="form-control" value="8" min="0" max="24" step="0.5" required>
-                                <small class="text-muted">Durée d'utilisation quotidienne</small>
+                                <input type="number"
+                                       name="heures_jour"
+                                       class="form-control"
+                                       min="0.5"
+                                       max="24"
+                                       step="0.5"
+                                       value="8"
+                                       required>
                             </div>
 
                             <!-- Jours/semaine -->
-                            <div class="col-md-2 mb-3">
+                            <div class="col-md-4">
                                 <label class="form-label fw-bold">
-                                    <i class="fas fa-calendar"></i> Jours/semaine
+                                    <i class="fas fa-calendar-week"></i> Jours/semaine
                                 </label>
-                                <input type="number" name="jours_semaine" class="form-control" value="5" min="0" max="7" required>
-                                <small class="text-muted">Fréquence d'utilisation</small>
+                                <input type="number"
+                                       name="jours_semaine"
+                                       class="form-control"
+                                       min="1"
+                                       max="7"
+                                       value="5"
+                                       required>
                             </div>
 
-                        </div>
-
-                        <div class="text-center mt-3">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-plus"></i> Ajouter
-                            </button>
+                            <!-- Bouton ajouter -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold invisible">Ajouter</label>
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-plus"></i> Ajouter
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -304,4 +406,108 @@
     </div>
 
 </div>
+
+<!-- Script pour suggestions de puissance -->
+<script>
+// Suggestions de puissance typiques par équipement
+const puissancesSuggestions = {
+    // Éclairage
+    'Ampoule LED': { min: 5, max: 15, typique: 10 },
+    'Ampoule halogène': { min: 35, max: 75, typique: 50 },
+    'Tube fluorescent': { min: 18, max: 58, typique: 36 },
+    'Spot encastré LED': { min: 3, max: 12, typique: 7 },
+    'Néon': { min: 15, max: 65, typique: 36 },
+    'Lampe de bureau': { min: 5, max: 20, typique: 10 },
+
+    // Climatisation
+    'Climatiseur split inverter': { min: 800, max: 3500, typique: 1500 },
+    'Climatiseur split standard': { min: 1200, max: 3000, typique: 2000 },
+    'Climatiseur window': { min: 1000, max: 2000, typique: 1500 },
+    'Ventilateur de plafond': { min: 50, max: 100, typique: 75 },
+    'Ventilateur sur pied': { min: 40, max: 75, typique: 50 },
+    'Brasseur d\'air': { min: 100, max: 300, typique: 200 },
+
+    // Réfrigération
+    'Réfrigérateur': { min: 100, max: 250, typique: 150 },
+    'Congélateur': { min: 150, max: 300, typique: 200 },
+    'Réfrigérateur-congélateur': { min: 150, max: 400, typique: 250 },
+    'Mini-réfrigérateur': { min: 50, max: 100, typique: 70 },
+    'Cave à vin': { min: 100, max: 200, typique: 150 },
+
+    // Cuisson
+    'Micro-ondes': { min: 700, max: 1200, typique: 1000 },
+    'Four électrique': { min: 2000, max: 3500, typique: 2500 },
+    'Plaque de cuisson': { min: 1500, max: 3000, typique: 2000 },
+    'Cuisinière électrique': { min: 2500, max: 5000, typique: 3500 },
+    'Bouilloire électrique': { min: 1500, max: 2500, typique: 2000 },
+    'Cafetière': { min: 600, max: 1200, typique: 800 },
+    'Grille-pain': { min: 800, max: 1500, typique: 1000 },
+    'Friteuse électrique': { min: 1500, max: 2500, typique: 2000 },
+
+    // Informatique
+    'Ordinateur de bureau': { min: 200, max: 500, typique: 300 },
+    'Ordinateur portable': { min: 45, max: 90, typique: 65 },
+    'Écran d\'ordinateur': { min: 20, max: 60, typique: 40 },
+    'Imprimante laser': { min: 300, max: 600, typique: 400 },
+    'Imprimante jet d\'encre': { min: 10, max: 30, typique: 15 },
+    'Photocopieuse': { min: 1000, max: 2000, typique: 1500 },
+    'Scanner': { min: 10, max: 30, typique: 15 },
+    'Serveur informatique': { min: 300, max: 1000, typique: 500 },
+
+    // Électronique
+    'Télévision LED 32 pouces': { min: 30, max: 70, typique: 50 },
+    'Télévision LED 43 pouces': { min: 50, max: 90, typique: 70 },
+    'Télévision LED 55 pouces': { min: 80, max: 150, typique: 100 },
+    'Télévision LED 65 pouces': { min: 120, max: 200, typique: 150 },
+    'Décodeur TV': { min: 10, max: 30, typique: 15 },
+    'Chaîne Hi-Fi': { min: 50, max: 200, typique: 100 },
+    'Barre de son': { min: 30, max: 100, typique: 50 },
+    'Projecteur': { min: 150, max: 400, typique: 250 },
+    'Console de jeux': { min: 100, max: 200, typique: 150 },
+
+    // Électroménager
+    'Machine à laver': { min: 300, max: 800, typique: 500 },
+    'Sèche-linge': { min: 2000, max: 4000, typique: 3000 },
+    'Lave-vaisselle': { min: 1200, max: 2000, typique: 1500 },
+    'Fer à repasser': { min: 1000, max: 1500, typique: 1200 },
+    'Aspirateur': { min: 1000, max: 2000, typique: 1400 },
+    'Aspirateur robot': { min: 20, max: 50, typique: 30 },
+    'Chauffe-eau électrique': { min: 1500, max: 3000, typique: 2000 },
+
+    // Réseau
+    'Routeur WiFi': { min: 5, max: 15, typique: 10 },
+    'Switch réseau': { min: 5, max: 20, typique: 10 },
+    'Modem': { min: 5, max: 15, typique: 10 },
+    'Point d\'accès WiFi': { min: 5, max: 15, typique: 10 },
+    'Chargeur de téléphone': { min: 5, max: 20, typique: 10 },
+
+    // Technique
+    'Pompe à eau': { min: 500, max: 1500, typique: 750 },
+    'Surpresseur': { min: 600, max: 1200, typique: 800 },
+    'Système d\'alarme': { min: 10, max: 50, typique: 20 },
+    'Caméra de surveillance': { min: 5, max: 15, typique: 10 },
+    'Onduleur UPS': { min: 500, max: 2000, typique: 1000 }
+};
+
+// Mise à jour de la suggestion quand l'équipement change
+document.getElementById('equipement-select').addEventListener('change', function() {
+    const equipement = this.value;
+    const puissanceInput = document.getElementById('puissance-input');
+    const suggestionDiv = document.getElementById('suggestion-puissance');
+
+    if (puissancesSuggestions[equipement]) {
+        const suggestion = puissancesSuggestions[equipement];
+        puissanceInput.value = suggestion.typique;
+        puissanceInput.min = suggestion.min;
+        puissanceInput.max = suggestion.max;
+        suggestionDiv.innerHTML = `💡 Typique: ${suggestion.typique}W (${suggestion.min}-${suggestion.max}W)`;
+    } else {
+        puissanceInput.value = '';
+        puissanceInput.min = 1;
+        puissanceInput.max = 10000;
+        suggestionDiv.innerHTML = '';
+    }
+});
+</script>
+
 {% endblock %}

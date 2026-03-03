@@ -7,7 +7,10 @@
 <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--voltix-blue);">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="{{ url_for('accueil') }}">
-            <i class="fas fa-bolt"></i> Voltix Audit
+            <img src="{{ url_for('static', filename='images/logo.png') }}"
+                 alt="Logo"
+                 style="height: 35px; width: 35px; margin-right: 10px; vertical-align: middle; object-fit: contain;">
+            Voltix Audit
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -25,12 +28,12 @@
                     </a>
                 </li>
                 {% if current_user.plan == 'pro' %}
-    <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('comparer_projets') }}">
-            <i class="fas fa-balance-scale"></i> Comparer
-        </a>
-    </li>
-{% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('comparer_projets') }}">
+                        <i class="fas fa-balance-scale"></i> Comparer
+                    </a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('mon_compte') }}">
                         <i class="fas fa-user"></i> Mon compte
@@ -57,25 +60,26 @@
             </h2>
             <p class="text-muted">{{ projets|length }} projet(s)</p>
         </div>
-<div class="col-md-4 text-md-end">
-    <a href="{{ url_for('nouveau_projet') }}" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Nouveau projet
-    </a>
+        <div class="col-md-6 text-md-end">
+            <a href="{{ url_for('nouveau_projet') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouveau projet
+            </a>
 
-    {% if current_user.plan == 'gratuit' %}
-        <small class="text-muted d-block mt-2">
-            <i class="fas fa-info-circle"></i>
-            {{ projets|length }}/3 projets actifs
-            {% if projets|length >= 3 %}
-                <br>
-                <span class="text-danger">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Limite atteinte - <a href="{{ url_for('tarifs') }}">Passer à Pro</a>
-                </span>
+            {% if current_user.plan == 'gratuit' %}
+                <small class="text-muted d-block mt-2">
+                    <i class="fas fa-info-circle"></i>
+                    {{ projets|length }}/3 projets actifs
+                    {% if projets|length >= 3 %}
+                        <br>
+                        <span class="text-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Limite atteinte - <a href="{{ url_for('tarifs') }}">Passer à Pro</a>
+                        </span>
+                    {% endif %}
+                </small>
             {% endif %}
-        </small>
-    {% endif %}
-</div>
+        </div>
+    </div>
 
     <!-- Filtres -->
     <div class="row mb-4">
@@ -101,18 +105,33 @@
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card h-100 border-0 shadow-sm hover-shadow">
                     <div class="card-body">
-                        <!-- Statut badge -->
+                        <!-- Statut badge + Badge UEMOA -->
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <h5 class="card-title mb-0">{{ projet.nom_projet }}</h5>
-                            <span class="badge bg-{{ 'success' if projet.statut == 'termine' else 'warning' if projet.statut == 'en_cours' else 'secondary' }}">
+                            <div>
+                                <span class="badge bg-{{ 'success' if projet.statut == 'termine' else 'warning' if projet.statut == 'en_cours' else 'secondary' }}">
+                                    {% if projet.statut == 'termine' %}
+                                        <i class="fas fa-check"></i> Terminé
+                                    {% elif projet.statut == 'en_cours' %}
+                                        <i class="fas fa-spinner"></i> En cours
+                                    {% else %}
+                                        <i class="fas fa-exclamation"></i> Incomplet
+                                    {% endif %}
+                                </span>
+
+                                <!-- Badge conformité UEMOA (seulement si projet terminé) -->
                                 {% if projet.statut == 'termine' %}
-                                    <i class="fas fa-check"></i> Terminé
-                                {% elif projet.statut == 'en_cours' %}
-                                    <i class="fas fa-spinner"></i> En cours
-                                {% else %}
-                                    <i class="fas fa-exclamation"></i> Incomplet
+                                    {% if projet.get('classe_energie') in ['A', 'B', 'C'] %}
+                                        <span class="badge bg-success ms-1" title="Conforme directives UEMOA">
+                                            <i class="fas fa-certificate"></i> UEMOA
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark ms-1" title="Non conforme directives UEMOA">
+                                            <i class="fas fa-exclamation-triangle"></i> UEMOA
+                                        </span>
+                                    {% endif %}
                                 {% endif %}
-                            </span>
+                            </div>
                         </div>
 
                         <!-- Info projet -->
@@ -122,6 +141,16 @@
                         <p class="text-muted small mb-3">
                             <i class="fas fa-industry"></i> {{ projet.type_batiment }}
                         </p>
+
+                        <!-- Classe énergétique si terminé -->
+                        {% if projet.statut == 'termine' and projet.get('classe_energie') %}
+                        <div class="mb-3">
+                            <span class="badge bg-{{ 'success' if projet.classe_energie in ['A', 'B'] else 'warning' if projet.classe_energie == 'C' else 'danger' }}"
+                                  style="font-size: 0.9rem;">
+                                Classe {{ projet.classe_energie }}
+                            </span>
+                        </div>
+                        {% endif %}
 
                         <!-- Progression -->
                         <div class="mb-3">
@@ -179,4 +208,4 @@
 }
 </style>
 {% endblock %}
-    </div>
+

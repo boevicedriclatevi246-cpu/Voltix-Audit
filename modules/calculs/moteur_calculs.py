@@ -11,6 +11,7 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from config.config import DATABASE_PATH, TARIFS_ELECTRICITE, FACTEUR_EMISSION_CO2
+from modules.calculs.verification_uemoa import verificateur_uemoa
 
 
 class MoteurCalculs:
@@ -100,7 +101,8 @@ class MoteurCalculs:
 
     def determiner_classe_energie(self, consommation_kwh_m2_an):
         """
-        Détermine la classe énergétique (A à G)
+        Détermine la classe énergétique selon référentiel UEMOA
+        Directive 05/2020
 
         Args:
             consommation_kwh_m2_an: Consommation en kWh/m²/an
@@ -108,20 +110,9 @@ class MoteurCalculs:
         Returns:
             str: Classe énergétique (A, B, C, D, E, F, G)
         """
-        if consommation_kwh_m2_an <= 50:
-            return 'A'
-        elif consommation_kwh_m2_an <= 90:
-            return 'B'
-        elif consommation_kwh_m2_an <= 150:
-            return 'C'
-        elif consommation_kwh_m2_an <= 230:
-            return 'D'
-        elif consommation_kwh_m2_an <= 330:
-            return 'E'
-        elif consommation_kwh_m2_an <= 450:
-            return 'F'
-        else:
-            return 'G'
+        # Utiliser le vérificateur UEMOA
+        verif = verificateur_uemoa.verifier_batiment(consommation_kwh_m2_an)
+        return verif['classe_energie']
 
     # ========================================
     # CALCUL COMPLET DE L'AUDIT
@@ -187,28 +178,38 @@ class MoteurCalculs:
             tarif = TARIFS_ELECTRICITE.get(pays, 100)
             cout_annuel_fcfa = consommation_kwh_an * tarif
 
-            # Enregistrer les résultats
+            # Vérifier conformité UEMOA
+            rapport_uemoa = verificateur_uemoa.generer_rapport_conformite(projet_id, consommation_kwh_m2_an)
+
+            # Enregistrer les résultats AVEC conformité UEMOA
             cursor.execute("""
                 INSERT INTO resultats_audits (
-                    projet_id, consommation_totale_kwh_an, classe_energie,
-                    emissions_co2_kg_an, cout_annuel_fcfa, score_performance
-                ) VALUES (?, ?, ?, ?, ?, ?)
+                    projet_id, consommation_totale_kwh_an, consommation_kwh_m2_an,
+                    classe_energie, emissions_co2_kg_an, cout_annuel_fcfa, 
+                    score_performance, surface_totale,
+                    conforme_uemoa_04, conforme_uemoa_05, taux_conformite_equipements
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 projet_id,
                 consommation_kwh_an,
+                consommation_kwh_m2_an,
                 classe_energie,
                 emissions_co2_kg_an,
                 cout_annuel_fcfa,
-                score_performance
+                score_performance,
+                surface_totale,
+                1 if rapport_uemoa['directive_04']['conforme'] else 0,
+                1 if rapport_uemoa['directive_05']['conforme'] else 0,
+                rapport_uemoa['directive_04']['taux_conformite']
             ))
 
             # Mettre à jour le statut du projet
             pourcentage = 100  # Audit terminé
             cursor.execute("""
-                UPDATE projets 
-                SET statut = 'termine', pourcentage_completion = ?
-                WHERE id = ?
-            """, (pourcentage, projet_id))
+                            UPDATE projets 
+                            SET statut = 'termine', pourcentage_completion = ?
+                            WHERE id = ?
+                        """, (pourcentage, projet_id))
 
             conn.commit()
             conn.close()
@@ -224,6 +225,7 @@ class MoteurCalculs:
                 'surface_totale': surface_totale
             }
 
+            print(f"✅ Consommation: {consommation_kwh_m2_an:.1f} kWh/m²/an")
             print(f"✅ Classe énergétique: {classe_energie}")
             print(f"✅ Score de performance: {score_performance}/100")
             print(f"✅ Audit calculé avec succès")

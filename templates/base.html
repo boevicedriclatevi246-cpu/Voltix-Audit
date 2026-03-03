@@ -93,6 +93,58 @@ if ('serviceWorker' in navigator) {
     </div>
 </nav>
 
+    <!-- Info UEMOA -->
+<div class="text-center mt-3 pt-3 border-top">
+    <small class="text-muted">
+        <i class="fas fa-certificate text-success"></i>
+        Audits conformes aux Directives UEMOA N°04/2020 et N°05/2020
+        <br>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalUEMOA" class="text-muted">
+            En savoir plus sur les directives UEMOA
+        </a>
+    </small>
+</div>
+
+<!-- Modal info UEMOA -->
+<div class="modal fade" id="modalUEMOA" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-certificate"></i> Directives UEMOA
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Directive N°04/2020/CM/UEMOA</h6>
+                <p class="small">
+                    <strong>Étiquetage énergétique des lampes électriques et appareils électroménagers</strong>
+                    <br>
+                    Cette directive impose l'étiquetage énergétique pour informer les consommateurs
+                    et promouvoir les équipements performants (classes A à G).
+                </p>
+
+                <h6 class="mt-3">Directive N°05/2020/CM/UEMOA</h6>
+                <p class="small">
+                    <strong>Efficacité énergétique dans la construction des bâtiments</strong>
+                    <br>
+                    Cette directive fixe des normes de performance énergétique pour les bâtiments neufs
+                    et rénovés (isolation, ventilation, systèmes énergétiques performants).
+                </p>
+
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Voltix Audit</strong> vérifie automatiquement la conformité de votre installation
+                    à ces directives et vous fournit des recommandations pour atteindre les normes UEMOA.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Bouton Toggle Dark Mode -->
     <button class="theme-toggle" title="Changer le thème">
         <i class="fas fa-moon"></i>
